@@ -6,7 +6,7 @@ namespace JustMeetinPoint.Maui.Features.Auth.Services;
 
 public class SocketAuthService : IAuthService
 {
-    private readonly string _serverIp = "192.168.111.29";
+    private readonly string _serverIp = "192.168.1.36";
     private readonly int _serverPort = 1001;
 
     public async Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto request)

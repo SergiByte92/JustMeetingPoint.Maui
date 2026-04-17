@@ -11,7 +11,7 @@ namespace JustMeetinPoint.Maui.Features.Auth.Views
 
         private async void OnRegisterClicked(object sender, EventArgs e)
         {
-            await Shell.Current.GoToAsync("register");
+            await Shell.Current.GoToAsync("///register");
         }
 
         private async void OnLoginClicked(object sender, EventArgs e)

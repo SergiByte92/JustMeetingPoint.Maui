@@ -1,8 +1,8 @@
 namespace JustMeetinPoint.Maui.Features.Home.Views;
 
-public partial class HomeView : ContentPage
+public partial class ProfileView : ContentPage
 {
-    public HomeView()
+    public ProfileView()
     {
         InitializeComponent();
     }

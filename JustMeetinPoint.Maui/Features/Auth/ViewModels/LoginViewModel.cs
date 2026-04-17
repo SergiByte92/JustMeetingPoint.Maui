@@ -83,8 +83,7 @@ public class LoginViewModel : BaseViewModel
 
             if (response.Success)
             {
-                await MainThread.InvokeOnMainThreadAsync(() =>
-                    Application.Current?.MainPage?.DisplayAlert("Info", "Login correcto.", "OK"));
+                await Shell.Current.GoToAsync("///main/home");
             }
         }
         catch (Exception ex)

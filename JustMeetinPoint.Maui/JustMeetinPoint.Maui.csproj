@@ -60,8 +60,20 @@
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 
+		<MauiXaml Update="Features\Home\Views\GroupsView.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+
 		<MauiXaml Update="Features\Home\Views\HomeView.xaml">
 			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+
+		<MauiXaml Update="Features\Home\Views\Map.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+
+		<MauiXaml Update="Features\Home\Views\ProfileView.xaml">
+		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 	</ItemGroup>
 

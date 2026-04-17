@@ -7,7 +7,6 @@
     xmlns:homeViews="clr-namespace:JustMeetinPoint.Maui.Features.Home.Views"
     Shell.FlyoutBehavior="Disabled">
 
-    <!-- Flujo de autenticación -->
     <ShellContent
         Title="Login"
         ContentTemplate="{DataTemplate authViews:LoginView}"
@@ -18,7 +17,6 @@
         ContentTemplate="{DataTemplate authViews:RegisterView}"
         Route="register" />
 
-    <!-- Zona principal con TabBar -->
     <TabBar Route="main">
         <ShellContent
             Title="Inicio"

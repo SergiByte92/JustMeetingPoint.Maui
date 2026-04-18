@@ -1,14 +1,12 @@
-using JustMeetinPoint.Maui.Features.Auth.Services;
 using JustMeetinPoint.Maui.Features.Auth.ViewModels;
 
-namespace JustMeetinPoint.Maui.Features.Auth.Views
+namespace JustMeetinPoint.Maui.Features.Auth.Views;
+
+public partial class LoginView : ContentPage
 {
-    public partial class LoginView : ContentPage
+    public LoginView(LoginViewModel viewModel)
     {
-        public LoginView()
-        {
-            InitializeComponent();
-            BindingContext = new LoginViewModel(new SocketAuthService());
-        }
+        InitializeComponent();
+        BindingContext = viewModel;
     }
 }

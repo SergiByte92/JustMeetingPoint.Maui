@@ -69,12 +69,9 @@
                 Command="{Binding RefreshCommand}" />
 
             <Button
-                Text="Salir del grupo"
-                HeightRequest="52"
-                CornerRadius="14"
-                BackgroundColor="#102A49"
-                TextColor="#EAEAEA"
-                Command="{Binding LeaveGroupCommand}" />
+                Text="Iniciar grupo"
+                IsVisible="{Binding CanStartGroup}"
+                Command="{Binding StartCommand}" />
 
         </VerticalStackLayout>
     </ScrollView>

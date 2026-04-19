@@ -26,18 +26,22 @@ public static class MauiProgram
         // IGroupService depende de IAuthService para reutilizar el socket.
         // También Singleton porque comparte estado de sesión.
         builder.Services.AddSingleton<IGroupService, GroupService>();
-
+        builder.Services.AddSingleton<IMeetingStateService, MeetingStateService>();
         // ── VIEWMODELS (Transient: nueva instancia cada vez que se navega) ───
         builder.Services.AddTransient<LoginViewModel>();
         builder.Services.AddTransient<RegisterViewModel>();   // ← AÑADIDO
         builder.Services.AddTransient<GroupsViewModel>();
         builder.Services.AddTransient<GroupLobbyViewModel>();
+        builder.Services.AddTransient<MapViewModel>();
 
         // ── VIEWS (Transient: ligadas a su ViewModel) ────────────────────────
         builder.Services.AddTransient<LoginView>();
         builder.Services.AddTransient<RegisterView>();        // ← AÑADIDO
         builder.Services.AddTransient<GroupsView>();
         builder.Services.AddTransient<GroupLobbyView>();
+        builder.Services.AddTransient<MapView>();
+
+ 
 
         // NOTA: HomeView, MapView y ProfileView no necesitan registro en DI
         // mientras no reciban ViewModel por constructor. Si en el futuro

@@ -14,6 +14,9 @@ public class GroupService : IGroupService
 
     private const int LobbyOptionRefresh = 1;
     private const int LobbyOptionExit = 2;
+    private const int LobbyOptionStart = 3;
+    private const int LobbyOptionSendLocation = 4;
+    private const int LobbyOptionPollResult = 5;
 
     public GroupService(IAuthService authService)
     {
@@ -25,8 +28,6 @@ public class GroupService : IGroupService
         return await Task.Run(() =>
         {
             Socket socket = GetAuthenticatedSocket();
-
-            Console.WriteLine("[GroupService] Enviando MainGroup.CreateGroup...");
 
             string groupName = "Grupo";
             string groupLabel = "General";
@@ -45,9 +46,7 @@ public class GroupService : IGroupService
                 throw new InvalidOperationException("No se pudo crear el grupo en el servidor.");
 
             string groupCode = SocketTools.receiveString(socket);
-            Console.WriteLine($"[GroupService] GroupCode recibido = {groupCode}");
 
-            // Tras crear grupo, el servidor entra automáticamente en LobbyGroup(...)
             bool sessionValid = SocketTools.receiveBool(socket);
 
             if (!sessionValid)
@@ -71,8 +70,6 @@ public class GroupService : IGroupService
         return await Task.Run(() =>
         {
             Socket socket = GetAuthenticatedSocket();
-
-            Console.WriteLine("[GroupService] Enviando MainGroup.JoinGroup...");
 
             SocketTools.sendInt(socket, MainGroupJoinGroup);
             SocketTools.sendString(groupCode, socket);
@@ -106,8 +103,6 @@ public class GroupService : IGroupService
         {
             Socket socket = GetAuthenticatedSocket();
 
-            Console.WriteLine("[GroupService] Enviando LobbyOption.Refresh...");
-
             SocketTools.sendInt(socket, LobbyOptionRefresh);
 
             bool sessionValid = SocketTools.receiveBool(socket);
@@ -133,18 +128,82 @@ public class GroupService : IGroupService
         await Task.Run(() =>
         {
             Socket socket = GetAuthenticatedSocket();
-
-            Console.WriteLine("[GroupService] Enviando LobbyOption.Exit...");
             SocketTools.sendInt(socket, LobbyOptionExit);
+        });
+    }
+
+    public async Task<bool> StartGroupAsync(string groupCode, bool isCurrentUserHost)
+    {
+        return await Task.Run(() =>
+        {
+            if (!isCurrentUserHost)
+                return false;
+
+            Socket socket = GetAuthenticatedSocket();
+
+            SocketTools.sendInt(socket, LobbyOptionStart);
+            bool started = SocketTools.receiveBool(socket);
+
+            return started;
+        });
+    }
+
+    public async Task<MeetingResultModel?> SendLocationAndWaitResultAsync(string groupCode, double latitude, double longitude)
+    {
+        return await Task.Run(() =>
+        {
+            Socket socket = GetAuthenticatedSocket();
+
+            SocketTools.sendInt(socket, LobbyOptionSendLocation);
+            SocketTools.sendDouble(socket,latitude);
+            SocketTools.sendDouble(socket,longitude);
+
+            double resultLat = SocketTools.receiveDouble(socket);
+            double resultLon = SocketTools.receiveDouble(socket);
+            int duration = SocketTools.receiveInt(socket);
+
+            if (duration == -1)
+            {
+                while (true)
+                {
+                    Thread.Sleep(1500);
+
+                    SocketTools.sendInt(socket, LobbyOptionPollResult);
+
+                    resultLat = SocketTools.receiveDouble(socket);
+                    resultLon = SocketTools.receiveDouble(socket);
+                    duration = SocketTools.receiveInt(socket);
+
+                    if (duration >= 0)
+                    {
+                        return new MeetingResultModel
+                        {
+                            Latitude = resultLat,
+                            Longitude = resultLon,
+                            DurationSeconds = duration
+                        };
+                    }
+
+                    if (duration == -2)
+                        throw new InvalidOperationException("Error calculando la ruta en el servidor.");
+                }
+            }
+
+            if (duration == -2)
+                throw new InvalidOperationException("Error calculando la ruta en el servidor.");
+
+            return new MeetingResultModel
+            {
+                Latitude = resultLat,
+                Longitude = resultLon,
+                DurationSeconds = duration
+            };
         });
     }
 
     private Socket GetAuthenticatedSocket()
     {
         Socket? socket = _authService.CurrentSocket;
-
-        Console.WriteLine($"[GroupService] Socket null? {socket == null}");
-        Console.WriteLine($"[GroupService] Socket connected? {socket?.Connected}");
 
         if (socket == null || !socket.Connected)
             throw new InvalidOperationException("No hay una sesión autenticada activa.");

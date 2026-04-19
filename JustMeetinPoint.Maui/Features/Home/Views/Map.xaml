@@ -6,12 +6,22 @@
     Title="Mapa"
     BackgroundColor="#0B2545">
 
-    <Grid>
-        <Label Text="MapView"
-               TextColor="White"
-               FontSize="28"
-               HorizontalOptions="Center"
-               VerticalOptions="Center" />
-    </Grid>
+    <VerticalStackLayout Padding="24" Spacing="16">
+        <Label Text="Resultado del servidor"
+               FontSize="24"
+               FontAttributes="Bold"
+               TextColor="White" />
 
+        <Label Text="{Binding Latitude, StringFormat='Latitud: {0:F6}'}"
+               TextColor="White"
+               FontSize="16" />
+
+        <Label Text="{Binding Longitude, StringFormat='Longitud: {0:F6}'}"
+               TextColor="White"
+               FontSize="16" />
+
+        <Label Text="{Binding DurationSeconds, StringFormat='Duración: {0} segundos'}"
+               TextColor="White"
+               FontSize="16" />
+    </VerticalStackLayout>
 </ContentPage>

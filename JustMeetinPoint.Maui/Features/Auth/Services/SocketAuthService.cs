@@ -6,26 +6,34 @@ namespace JustMeetinPoint.Maui.Features.Auth.Services;
 
 public class SocketAuthService : IAuthService
 {
-    private readonly string _serverIp = "192.168.1.36";
-    private readonly int _serverPort = 1001;
+    // ✅ CORRECTO: centralizar la configuración de red en constantes.
+    // Así, si cambias de servidor, cambias UNA línea, no buscas por todo el código.
+    // El siguiente paso ideal sería leer esto desde appsettings.json o Preferences.
+    private const string ServerIp = "192.168.1.36";
+    private const int ServerPort = 1001;
 
     public Socket? CurrentSocket { get; private set; }
 
+    // IsAuthenticated: propiedad derivada, no almacena estado propio.
+    // Consulta directamente el socket — si está null o desconectado, no estás autenticado.
     public bool IsAuthenticated => CurrentSocket != null && CurrentSocket.Connected;
 
     public async Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto request)
     {
         return await Task.Run(() =>
         {
+            // Task.Run: ejecuta en un hilo de background.
+            // Los sockets son bloqueantes — si corrieran en el hilo de UI,
+            // la app se congela mientras espera respuesta del servidor.
             Socket? socket = null;
 
             try
             {
                 Console.WriteLine("Register: intentando conectar...");
-                socket = SocketTools.CreateSocketConnection(_serverIp, _serverPort);
+                socket = SocketTools.CreateSocketConnection(ServerIp, ServerPort);
                 Console.WriteLine("Register: conexión OK");
 
-                SocketTools.sendInt(socket, 2); // MainUser.Register
+                SocketTools.sendInt(socket, 2); // Opcode MainUser.Register
                 Console.WriteLine("Register: opción enviada");
 
                 SocketTools.sendString(request.Username, socket);
@@ -57,6 +65,8 @@ public class SocketAuthService : IAuthService
             }
             finally
             {
+                // Register no guarda el socket: cierra siempre.
+                // Solo Login persiste el socket para la sesión.
                 socket?.Close();
             }
         });
@@ -71,10 +81,10 @@ public class SocketAuthService : IAuthService
             try
             {
                 Console.WriteLine("Login: intentando conectar...");
-                socket = SocketTools.CreateSocketConnection(_serverIp, _serverPort);
+                socket = SocketTools.CreateSocketConnection(ServerIp, ServerPort);
                 Console.WriteLine("Login: conexión OK");
 
-                SocketTools.sendInt(socket, 1); // MainUser.Login
+                SocketTools.sendInt(socket, 1); // Opcode MainUser.Login
                 Console.WriteLine("Login: opción enviada");
 
                 SocketTools.sendString(request.Email, socket);
@@ -89,7 +99,6 @@ public class SocketAuthService : IAuthService
                 if (!success)
                 {
                     socket.Close();
-
                     return new LoginResponseDto
                     {
                         Success = false,
@@ -97,6 +106,9 @@ public class SocketAuthService : IAuthService
                     };
                 }
 
+                // ✅ Solo en Login exitoso se guarda el socket.
+                // Este socket se reutiliza en GroupService para todas
+                // las operaciones de grupo durante la sesión.
                 CurrentSocket = socket;
 
                 Console.WriteLine("Login OK. Socket autenticado guardado.");
@@ -112,13 +124,7 @@ public class SocketAuthService : IAuthService
             {
                 Console.WriteLine($"Login: error -> {ex}");
 
-                try
-                {
-                    socket?.Close();
-                }
-                catch
-                {
-                }
+                try { socket?.Close(); } catch { }
 
                 return new LoginResponseDto
                 {
@@ -131,22 +137,8 @@ public class SocketAuthService : IAuthService
 
     public void Logout()
     {
-        try
-        {
-            CurrentSocket?.Shutdown(SocketShutdown.Both);
-        }
-        catch
-        {
-        }
-
-        try
-        {
-            CurrentSocket?.Close();
-        }
-        catch
-        {
-        }
-
+        try { CurrentSocket?.Shutdown(SocketShutdown.Both); } catch { }
+        try { CurrentSocket?.Close(); } catch { }
         CurrentSocket = null;
     }
 }

@@ -15,73 +15,79 @@ public partial class GroupLobbyViewModel : ObservableObject
         _groupService = groupService;
     }
 
-    [ObservableProperty]
-    private string groupCode = string.Empty;
+    // [ObservableProperty] genera automáticamente:
+    //   - La propiedad pública con nombre en PascalCase (groupCode → GroupCode)
+    //   - El campo privado backing
+    //   - La llamada a OnPropertyChanged en el setter
+    //   - Un método partial OnGroupCodeChanged() que puedes implementar
 
-    [ObservableProperty]
-    private int memberCount;
+    [ObservableProperty] private string groupCode = string.Empty;
+    [ObservableProperty] private int memberCount;
+    [ObservableProperty] private bool hasStarted;
+    [ObservableProperty] private bool isCurrentUserHost;
+    [ObservableProperty] private bool isBusy;
 
-    [ObservableProperty]
-    private bool hasStarted;
+    // ✅ AÑADIDO: propiedad para mostrar errores en la UI.
+    // Antes el catch estaba vacío — el usuario no sabía qué había fallado.
+    [ObservableProperty] private string errorMessage = string.Empty;
 
-    [ObservableProperty]
-    private bool isCurrentUserHost;
-
-    [ObservableProperty]
-    private bool isBusy;
-
+    // QueryProperty sólo puede recibir strings desde la URL de navegación.
+    // Por eso IsCurrentUserHost (bool) necesita esta propiedad puente que
+    // parsea el string "True"/"False" manualmente.
     public string IsCurrentUserHostRaw
     {
         set
         {
             if (bool.TryParse(value, out bool parsed))
-            {
                 IsCurrentUserHost = parsed;
-            }
         }
     }
 
+    // Propiedades computadas: se derivan de otras propiedades observables.
+    // No almacenan valor propio — se recalculan cada vez que se leen.
+    // OnMemberCountChanged y OnHasStartedChanged notifican manualmente
+    // que estas propiedades derivadas también han cambiado.
     public string StatusText => HasStarted
         ? "El grupo ya ha iniciado."
         : "Esperando a más participantes...";
 
-    public string ParticipantsText => $"{MemberCount} participante{(MemberCount == 1 ? string.Empty : "s")} conectado{(MemberCount == 1 ? string.Empty : "s")}";
+    public string ParticipantsText => $"{MemberCount} participante{(MemberCount == 1 ? "" : "s")} conectado{(MemberCount == 1 ? "" : "s")}";
 
+    // Estos métodos los genera [ObservableProperty] como partial vacíos.
+    // Al implementarlos, se ejecutan justo después de que la propiedad cambia.
     partial void OnGroupCodeChanged(string value)
     {
         if (!string.IsNullOrWhiteSpace(value))
-        {
+            // BeginInvokeOnMainThread: necesario porque OnGroupCodeChanged
+            // puede invocarse desde un hilo de background (QueryProperty).
+            // La navegación y las llamadas async a la UI deben hacerse en el hilo principal.
             MainThread.BeginInvokeOnMainThread(async () => await LoadLobbyAsync());
-        }
     }
 
-    partial void OnMemberCountChanged(int value)
-    {
-        OnPropertyChanged(nameof(ParticipantsText));
-    }
-
-    partial void OnHasStartedChanged(bool value)
-    {
-        OnPropertyChanged(nameof(StatusText));
-    }
+    partial void OnMemberCountChanged(int value) => OnPropertyChanged(nameof(ParticipantsText));
+    partial void OnHasStartedChanged(bool value) => OnPropertyChanged(nameof(StatusText));
 
     [RelayCommand]
     private async Task LoadLobbyAsync()
     {
-        if (IsBusy || string.IsNullOrWhiteSpace(GroupCode))
-            return;
+        if (IsBusy || string.IsNullOrWhiteSpace(GroupCode)) return;
 
         try
         {
             IsBusy = true;
+            ErrorMessage = string.Empty; // ✅ Limpia el error anterior
 
             var lobby = await _groupService.RefreshLobbyAsync(GroupCode, IsCurrentUserHost);
 
             MemberCount = lobby.MemberCount;
             HasStarted = lobby.HasStarted;
         }
-        catch
+        catch (Exception ex)
         {
+            // ✅ CORREGIDO: antes era catch{} vacío.
+            // Ahora el usuario ve qué falló y el desarrollador puede depurar.
+            ErrorMessage = $"Error al cargar el lobby: {ex.Message}";
+            Console.WriteLine($"[GroupLobbyViewModel] Error: {ex}");
         }
         finally
         {
@@ -90,22 +96,22 @@ public partial class GroupLobbyViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task RefreshAsync()
-    {
-        await LoadLobbyAsync();
-    }
+    private async Task RefreshAsync() => await LoadLobbyAsync();
 
     [RelayCommand]
     private async Task LeaveGroupAsync()
     {
-        if (IsBusy || string.IsNullOrWhiteSpace(GroupCode))
-            return;
+        if (IsBusy || string.IsNullOrWhiteSpace(GroupCode)) return;
 
         try
         {
             IsBusy = true;
             await _groupService.LeaveGroupAsync(GroupCode);
             await Shell.Current.GoToAsync("//main/groups");
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error al salir del grupo: {ex.Message}";
         }
         finally
         {

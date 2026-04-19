@@ -61,6 +61,15 @@
             </Border>
 
             <Button
+                Text="Iniciar grupo"
+                HeightRequest="52"
+                CornerRadius="14"
+                BackgroundColor="#D94FA8"
+                TextColor="White"
+                IsVisible="{Binding CanStartGroup}"
+                Command="{Binding StartCommand}" />
+
+            <Button
                 Text="Actualizar"
                 HeightRequest="52"
                 CornerRadius="14"
@@ -69,9 +78,18 @@
                 Command="{Binding RefreshCommand}" />
 
             <Button
-                Text="Iniciar grupo"
-                IsVisible="{Binding CanStartGroup}"
-                Command="{Binding StartCommand}" />
+                Text="Salir del grupo"
+                HeightRequest="52"
+                CornerRadius="14"
+                BackgroundColor="#102A49"
+                TextColor="#EAEAEA"
+                Command="{Binding LeaveGroupCommand}" />
+
+            <Label
+                Text="{Binding ErrorMessage}"
+                TextColor="#FF7B7B"
+                FontSize="14"
+                LineBreakMode="WordWrap" />
 
         </VerticalStackLayout>
     </ScrollView>

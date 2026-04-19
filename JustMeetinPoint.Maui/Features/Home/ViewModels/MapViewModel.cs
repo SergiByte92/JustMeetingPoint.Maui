@@ -11,11 +11,15 @@ public partial class MapViewModel : ObservableObject
     {
         _meetingStateService = meetingStateService;
 
+        Console.WriteLine($"[MapViewModel] CurrentResult null? {_meetingStateService.CurrentResult == null}");
+
         if (_meetingStateService.CurrentResult != null)
         {
             Latitude = _meetingStateService.CurrentResult.Latitude;
             Longitude = _meetingStateService.CurrentResult.Longitude;
             DurationSeconds = _meetingStateService.CurrentResult.DurationSeconds;
+
+            Console.WriteLine($"[MapViewModel] Resultado recibido => {Latitude}, {Longitude}, {DurationSeconds}");
         }
     }
 

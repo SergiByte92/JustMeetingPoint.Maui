@@ -64,17 +64,22 @@ public partial class GroupLobbyViewModel : ObservableObject
     [RelayCommand]
     private async Task LoadLobbyAsync()
     {
-        if (IsBusy || string.IsNullOrWhiteSpace(GroupCode)) return;
+        if (IsBusy || string.IsNullOrWhiteSpace(GroupCode))
+            return;
 
         try
         {
             IsBusy = true;
             ErrorMessage = string.Empty;
 
+            Console.WriteLine("[Lobby] LoadLobbyAsync");
+
             var lobby = await _groupService.RefreshLobbyAsync(GroupCode, IsCurrentUserHost);
 
             MemberCount = lobby.MemberCount;
             HasStarted = lobby.HasStarted;
+
+            Console.WriteLine($"[Lobby] MemberCount={MemberCount}, HasStarted={HasStarted}");
 
             if (HasStarted)
             {
@@ -84,6 +89,7 @@ public partial class GroupLobbyViewModel : ObservableObject
         catch (Exception ex)
         {
             ErrorMessage = $"Error al cargar el lobby: {ex.Message}";
+            Console.WriteLine($"[Lobby] Error en LoadLobbyAsync: {ex}");
         }
         finally
         {
@@ -92,7 +98,10 @@ public partial class GroupLobbyViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task RefreshAsync() => await LoadLobbyAsync();
+    private async Task RefreshAsync()
+    {
+        await LoadLobbyAsync();
+    }
 
     [RelayCommand]
     private async Task StartAsync()
@@ -105,7 +114,11 @@ public partial class GroupLobbyViewModel : ObservableObject
             IsBusy = true;
             ErrorMessage = string.Empty;
 
+            Console.WriteLine("[Lobby] StartAsync iniciado");
+
             bool started = await _groupService.StartGroupAsync(GroupCode, IsCurrentUserHost);
+
+            Console.WriteLine($"[Lobby] StartGroupAsync => {started}");
 
             if (!started)
             {
@@ -120,6 +133,7 @@ public partial class GroupLobbyViewModel : ObservableObject
         catch (Exception ex)
         {
             ErrorMessage = $"Error al iniciar el grupo: {ex.Message}";
+            Console.WriteLine($"[Lobby] Error en StartAsync: {ex}");
         }
         finally
         {
@@ -130,17 +144,21 @@ public partial class GroupLobbyViewModel : ObservableObject
     [RelayCommand]
     private async Task LeaveGroupAsync()
     {
-        if (IsBusy || string.IsNullOrWhiteSpace(GroupCode)) return;
+        if (IsBusy || string.IsNullOrWhiteSpace(GroupCode))
+            return;
 
         try
         {
             IsBusy = true;
+            ErrorMessage = string.Empty;
+
             await _groupService.LeaveGroupAsync(GroupCode);
             await Shell.Current.GoToAsync("//main/groups");
         }
         catch (Exception ex)
         {
             ErrorMessage = $"Error al salir del grupo: {ex.Message}";
+            Console.WriteLine($"[Lobby] Error en LeaveGroupAsync: {ex}");
         }
         finally
         {
@@ -150,24 +168,47 @@ public partial class GroupLobbyViewModel : ObservableObject
 
     private async Task SendCurrentLocationAndNavigateToMapAsync()
     {
+        Console.WriteLine("[Lobby] Entrando en SendCurrentLocationAndNavigateToMapAsync");
+
+        var permission = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
+        Console.WriteLine($"[Lobby] Permiso ubicación inicial: {permission}");
+
+        if (permission != PermissionStatus.Granted)
+        {
+            permission = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+            Console.WriteLine($"[Lobby] Permiso ubicación tras pedirlo: {permission}");
+        }
+
+        if (permission != PermissionStatus.Granted)
+            throw new InvalidOperationException("Permiso de ubicación denegado.");
+
         Location? location = await Geolocation.Default.GetLastKnownLocationAsync();
+        Console.WriteLine($"[Lobby] LastKnownLocation null? {location == null}");
 
         if (location == null)
         {
             location = await Geolocation.Default.GetLocationAsync(
                 new GeolocationRequest(GeolocationAccuracy.Best));
+
+            Console.WriteLine($"[Lobby] GetLocationAsync null? {location == null}");
         }
 
         if (location == null)
             throw new InvalidOperationException("No se pudo obtener la ubicación actual.");
+
+        Console.WriteLine($"[Lobby] Ubicación obtenida: {location.Latitude}, {location.Longitude}");
 
         MeetingResultModel? result = await _groupService.SendLocationAndWaitResultAsync(
             GroupCode,
             location.Latitude,
             location.Longitude);
 
+        Console.WriteLine($"[Lobby] Resultado null? {result == null}");
+
         if (result == null)
             throw new InvalidOperationException("No se recibió resultado del servidor.");
+
+        Console.WriteLine($"[Lobby] Resultado recibido: {result.Latitude}, {result.Longitude}, {result.DurationSeconds}");
 
         _meetingStateService.CurrentResult = result;
 

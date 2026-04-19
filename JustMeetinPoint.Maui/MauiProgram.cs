@@ -41,7 +41,12 @@ public static class MauiProgram
         builder.Services.AddTransient<GroupLobbyView>();
         builder.Services.AddTransient<MapView>();
 
- 
+
+
+        
+  
+  
+
 
         // NOTA: HomeView, MapView y ProfileView no necesitan registro en DI
         // mientras no reciban ViewModel por constructor. Si en el futuro

@@ -55,6 +55,9 @@
 		<Compile Update="Features\Home\Views\GroupLobbyView.xaml.cs">
 		  <DependentUpon>GroupLobbyView.xaml</DependentUpon>
 		</Compile>
+		<Compile Update="Features\Home\Views\MapView.xaml.cs">
+		  <DependentUpon>MapView.xaml</DependentUpon>
+		</Compile>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -78,7 +81,7 @@
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 
-		<MauiXaml Update="Features\Home\Views\Map.xaml">
+		<MauiXaml Update="Features\Home\Views\MapView.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 

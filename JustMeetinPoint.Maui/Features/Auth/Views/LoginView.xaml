@@ -5,71 +5,105 @@
     x:Class="JustMeetinPoint.Maui.Features.Auth.Views.LoginView"
     Shell.NavBarIsVisible="False"
     Shell.TabBarIsVisible="False"
-    BackgroundColor="#0B2545">
+    BackgroundColor="#F3F6FB">
 
-    <Grid RowDefinitions="*,Auto"
-          Padding="28">
+    <ScrollView>
+        <Grid Padding="28"
+              RowDefinitions="Auto,Auto">
 
-        <VerticalStackLayout Grid.Row="0"
-                             VerticalOptions="Center"
-                             HorizontalOptions="Center"
-                             Spacing="20">
+            <VerticalStackLayout Grid.Row="0"
+                                 Margin="0,48,0,28"
+                                 VerticalOptions="Center"
+                                 HorizontalOptions="Center"
+                                 Spacing="16">
 
-            <Image Source="app_logo.svg"
-                   WidthRequest="100"
-                   HeightRequest="100"
-                   Aspect="AspectFit" />
+                <Image Source="app_logo.svg"
+                       WidthRequest="96"
+                       HeightRequest="96"
+                       Aspect="AspectFit" />
 
-            <Label Text="Just Meeting Point"
-                   FontSize="30"
-                   FontAttributes="Bold"
-                   TextColor="White"
-                   HorizontalTextAlignment="Center" />
+                <Label Text="Just Meeting Point"
+                       FontSize="30"
+                       FontAttributes="Bold"
+                       TextColor="#1F1F1F"
+                       HorizontalTextAlignment="Center" />
 
-            <Label Text="Encuentra el punto justo para todos"
-                   FontSize="16"
-                   TextColor="#94A3B8"
-                   HorizontalTextAlignment="Center" />
-        </VerticalStackLayout>
+                <Label Text="Encuentra el punto justo para todos"
+                       FontSize="16"
+                       TextColor="#5F6368"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
 
-        <VerticalStackLayout Grid.Row="1"
-                             Spacing="12">
+            <Border Grid.Row="1"
+                    BackgroundColor="#FFFFFF"
+                    Stroke="#E3E7EE"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 24"
+                    Padding="20">
 
-            <Entry Placeholder="Correo electrónico"
-                   Text="{Binding Email}"
-                   Keyboard="Email"
-                   TextColor="White"
-                   PlaceholderColor="#94A3B8"
-                   BackgroundColor="Transparent" />
+                <VerticalStackLayout Spacing="14">
 
-            <Entry Placeholder="Contraseña"
-                   Text="{Binding Password}"
-                   IsPassword="True"
-                   TextColor="White"
-                   PlaceholderColor="#94A3B8"
-                   BackgroundColor="Transparent" />
+                    <Label Text="Iniciar sesión"
+                           FontSize="22"
+                           FontAttributes="Bold"
+                           TextColor="#1F1F1F" />
 
-            <Label Text="{Binding Message}"
-                   TextColor="Salmon"
-                   FontSize="14"
-                   LineBreakMode="WordWrap" />
+                    <Label Text="Accede para continuar"
+                           FontSize="14"
+                           TextColor="#5F6368" />
 
-            <Button Text="Iniciar sesión"
-                    HeightRequest="54"
-                    BackgroundColor="#5B3FD6"
-                    TextColor="White"
-                    CornerRadius="14"
-                    Command="{Binding LoginCommand}" />
+                    <Border
+                        Margin="0,8,0,0"
+                        BackgroundColor="#FFFFFF"
+                        Stroke="#DADCE0"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 14"
+                        Padding="14,4">
+                        <Entry Placeholder="Correo electrónico"
+                               Text="{Binding Email}"
+                               Keyboard="Email"
+                               TextColor="#1F1F1F"
+                               PlaceholderColor="#5F6368"
+                               BackgroundColor="Transparent" />
+                    </Border>
 
-            <Button Text="Crear cuenta"
-                    HeightRequest="54"
-                    BackgroundColor="Transparent"
-                    TextColor="White"
-                    BorderColor="White"
-                    BorderWidth="1"
-                    CornerRadius="14"
-                    Command="{Binding GoToRegisterCommand}" />
-        </VerticalStackLayout>
+                    <Border
+                        BackgroundColor="#FFFFFF"
+                        Stroke="#DADCE0"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 14"
+                        Padding="14,4">
+                        <Entry Placeholder="Contraseña"
+                               Text="{Binding Password}"
+                               IsPassword="True"
+                               TextColor="#1F1F1F"
+                               PlaceholderColor="#5F6368"
+                               BackgroundColor="Transparent" />
+                    </Border>
 
-    </Grid>
+                    <Label Text="{Binding Message}"
+                           TextColor="#D93025"
+                           FontSize="14"
+                           LineBreakMode="WordWrap" />
+
+                    <Button Text="Iniciar sesión"
+                            Margin="0,8,0,0"
+                            HeightRequest="54"
+                            BackgroundColor="#1A73E8"
+                            TextColor="White"
+                            CornerRadius="14"
+                            Command="{Binding LoginCommand}" />
+
+                    <Button Text="Crear cuenta"
+                            HeightRequest="54"
+                            BackgroundColor="#FFFFFF"
+                            TextColor="#1A73E8"
+                            BorderColor="#DADCE0"
+                            BorderWidth="1"
+                            CornerRadius="14"
+                            Command="{Binding GoToRegisterCommand}" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+    </ScrollView>
 </ContentPage>

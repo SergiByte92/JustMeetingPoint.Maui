@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     x:Class="JustMeetinPoint.Maui.Features.Home.Views.HomeView"
     Title="Inicio"
-    BackgroundColor="#F8F9FA">
+    BackgroundColor="#F6F7F9">
 
     <ScrollView>
         <VerticalStackLayout Spacing="0">
@@ -12,33 +12,35 @@
             <!-- HERO SUPERIOR -->
             <Border
                 BackgroundColor="#FFFFFF"
-                StrokeThickness="0"
+                Stroke="#D9DEE5"
+                StrokeThickness="1"
                 Padding="20,18,20,18">
 
                 <VerticalStackLayout Spacing="4">
                     <Label
-                        Text="Hola, Sergi 👋"
+                        Text="Hola, Sergi"
                         FontSize="24"
                         FontAttributes="Bold"
-                        TextColor="#202124" />
+                        TextColor="#20242A" />
 
                     <Label
                         Text="¿Dónde quedamos hoy?"
                         FontSize="14"
-                        TextColor="#5F6368" />
+                        TextColor="#667085" />
                 </VerticalStackLayout>
             </Border>
 
             <!-- CTA PRINCIPAL -->
             <Border
                 Margin="12,12,12,0"
-                BackgroundColor="#1A73E8"
+                BackgroundColor="#1F5FBF"
                 StrokeThickness="0"
                 StrokeShape="RoundRectangle 16"
                 Padding="18">
 
-                <Grid ColumnDefinitions="*,Auto">
-                    <VerticalStackLayout Spacing="6">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+
+                    <VerticalStackLayout Spacing="8">
                         <Label
                             Text="Organiza una nueva quedada"
                             FontSize="16"
@@ -46,34 +48,38 @@
                             TextColor="#FFFFFF" />
 
                         <Label
-                            Text="Crea un grupo, comparte el código y encuentra el punto más justo."
+                            Text="Crea un grupo, comparte el código y encuentra el punto de encuentro más equilibrado."
                             FontSize="12"
-                            TextColor="#DCE8FF" />
+                            TextColor="#DCE6F5"
+                            LineBreakMode="WordWrap" />
 
                         <Button
                             Text="Crear grupo"
-                            Margin="0,8,0,0"
-                            WidthRequest="130"
-                            HeightRequest="40"
+                            Margin="0,10,0,0"
+                            WidthRequest="140"
+                            HeightRequest="42"
                             BackgroundColor="#FFFFFF"
-                            TextColor="#1A73E8"
+                            TextColor="#163E73"
                             FontAttributes="Bold"
-                            CornerRadius="20"
+                            CornerRadius="12"
                             HorizontalOptions="Start" />
                     </VerticalStackLayout>
 
-                    <Label
+                    <!-- Acento decorativo sobrio -->
+                    <Border
                         Grid.Column="1"
-                        Text="📍"
-                        FontSize="34"
+                        WidthRequest="10"
+                        HeightRequest="10"
+                        BackgroundColor="#9BB7E3"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 5"
                         VerticalOptions="Center"
-                        Opacity="0.45"
-                        TextColor="#FFFFFF"
-                        Margin="12,0,0,0" />
+                        HorizontalOptions="End"
+                        Opacity="0.85" />
                 </Grid>
             </Border>
 
-            <!-- CABECERA SUGERENCIAS -->
+            <!-- HEADER SECCIÓN -->
             <Grid
                 Padding="16,18,16,8"
                 ColumnDefinitions="*,Auto">
@@ -82,17 +88,17 @@
                     Text="Sugerencias para hoy"
                     FontSize="15"
                     FontAttributes="Bold"
-                    TextColor="#202124" />
+                    TextColor="#20242A" />
 
                 <Label
                     Grid.Column="1"
                     Text="Ver más"
                     FontSize="12"
-                    TextColor="#1A73E8"
+                    TextColor="#1F5FBF"
                     VerticalOptions="End" />
             </Grid>
 
-            <!-- CHIPS -->
+            <!-- CHIPS SOBRIOS -->
             <ScrollView
                 Orientation="Horizontal"
                 Margin="12,0,0,0"
@@ -101,52 +107,52 @@
                 <HorizontalStackLayout Spacing="8" Padding="0,0,12,0">
 
                     <Border
-                        BackgroundColor="#E8F0FE"
-                        Stroke="#1A73E8"
+                        BackgroundColor="#EAF1FB"
+                        Stroke="#1F5FBF"
                         StrokeThickness="1"
                         StrokeShape="RoundRectangle 20"
                         Padding="14,8">
                         <Label
-                            Text="🍕 Comer"
+                            Text="Comer"
                             FontSize="12"
-                            TextColor="#1A73E8"
-                            FontAttributes="Bold" />
+                            FontAttributes="Bold"
+                            TextColor="#1F5FBF" />
                     </Border>
 
                     <Border
                         BackgroundColor="#FFFFFF"
-                        Stroke="#E8EAED"
+                        Stroke="#D9DEE5"
                         StrokeThickness="1"
                         StrokeShape="RoundRectangle 20"
                         Padding="14,8">
                         <Label
-                            Text="☕ Café"
+                            Text="Café"
                             FontSize="12"
-                            TextColor="#202124" />
+                            TextColor="#20242A" />
                     </Border>
 
                     <Border
                         BackgroundColor="#FFFFFF"
-                        Stroke="#E8EAED"
+                        Stroke="#D9DEE5"
                         StrokeThickness="1"
                         StrokeShape="RoundRectangle 20"
                         Padding="14,8">
                         <Label
-                            Text="🎭 Ocio"
+                            Text="Ocio"
                             FontSize="12"
-                            TextColor="#202124" />
+                            TextColor="#20242A" />
                     </Border>
 
                     <Border
                         BackgroundColor="#FFFFFF"
-                        Stroke="#E8EAED"
+                        Stroke="#D9DEE5"
                         StrokeThickness="1"
                         StrokeShape="RoundRectangle 20"
                         Padding="14,8">
                         <Label
-                            Text="🏃 Deporte"
+                            Text="Deporte"
                             FontSize="12"
-                            TextColor="#202124" />
+                            TextColor="#20242A" />
                     </Border>
 
                 </HorizontalStackLayout>
@@ -156,7 +162,7 @@
             <Border
                 Margin="12,12,12,0"
                 BackgroundColor="#FFFFFF"
-                Stroke="#E8EAED"
+                Stroke="#D9DEE5"
                 StrokeThickness="1"
                 StrokeShape="RoundRectangle 14"
                 Padding="14">
@@ -165,14 +171,16 @@
                     <Border
                         WidthRequest="40"
                         HeightRequest="40"
-                        BackgroundColor="#E8F0FE"
+                        BackgroundColor="#EEF2F6"
                         StrokeThickness="0"
                         StrokeShape="RoundRectangle 12">
-                        <Label
-                            Text="🍕"
+                        <BoxView
+                            WidthRequest="14"
+                            HeightRequest="14"
+                            CornerRadius="7"
+                            Color="#1F5FBF"
                             HorizontalOptions="Center"
-                            VerticalOptions="Center"
-                            FontSize="18" />
+                            VerticalOptions="Center" />
                     </Border>
 
                     <VerticalStackLayout Grid.Column="1" Spacing="2">
@@ -180,12 +188,12 @@
                             Text="Actividades para grupos pequeños"
                             FontSize="13"
                             FontAttributes="Bold"
-                            TextColor="#202124" />
+                            TextColor="#20242A" />
 
                         <Label
-                            Text="Propuestas para encuentros rápidos"
+                            Text="Propuestas rápidas para reuniones de baja fricción."
                             FontSize="11"
-                            TextColor="#5F6368" />
+                            TextColor="#667085" />
                     </VerticalStackLayout>
                 </Grid>
             </Border>
@@ -194,7 +202,7 @@
             <Border
                 Margin="12,8,12,20"
                 BackgroundColor="#FFFFFF"
-                Stroke="#E8EAED"
+                Stroke="#D9DEE5"
                 StrokeThickness="1"
                 StrokeShape="RoundRectangle 14"
                 Padding="14">
@@ -203,14 +211,16 @@
                     <Border
                         WidthRequest="40"
                         HeightRequest="40"
-                        BackgroundColor="#E6F4EA"
+                        BackgroundColor="#EEF2F6"
                         StrokeThickness="0"
                         StrokeShape="RoundRectangle 12">
-                        <Label
-                            Text="📍"
+                        <BoxView
+                            WidthRequest="14"
+                            HeightRequest="14"
+                            CornerRadius="7"
+                            Color="#667085"
                             HorizontalOptions="Center"
-                            VerticalOptions="Center"
-                            FontSize="18" />
+                            VerticalOptions="Center" />
                     </Border>
 
                     <VerticalStackLayout Grid.Column="1" Spacing="2">
@@ -218,12 +228,12 @@
                             Text="Sugerencia de punto final"
                             FontSize="13"
                             FontAttributes="Bold"
-                            TextColor="#202124" />
+                            TextColor="#20242A" />
 
                         <Label
-                            Text="Más adelante sugerirá lugares cercanos al punto calculado"
+                            Text="Aquí podrás mostrar locales o puntos de interés cercanos al resultado."
                             FontSize="11"
-                            TextColor="#5F6368" />
+                            TextColor="#667085" />
                     </VerticalStackLayout>
                 </Grid>
             </Border>

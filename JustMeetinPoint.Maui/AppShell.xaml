@@ -7,13 +7,13 @@
     xmlns:homeViews="clr-namespace:JustMeetinPoint.Maui.Features.Home.Views"
     Shell.FlyoutBehavior="Disabled"
     Shell.BackgroundColor="#FFFFFF"
-    Shell.ForegroundColor="#202124"
-    Shell.TitleColor="#202124"
-    Shell.UnselectedColor="#9AA0A6"
+    Shell.ForegroundColor="#20242A"
+    Shell.TitleColor="#20242A"
+    Shell.UnselectedColor="#98A2B3"
     Shell.TabBarBackgroundColor="#FFFFFF"
-    Shell.TabBarForegroundColor="#1A73E8"
-    Shell.TabBarTitleColor="#202124"
-    Shell.TabBarUnselectedColor="#9AA0A6"
+    Shell.TabBarForegroundColor="#1F5FBF"
+    Shell.TabBarTitleColor="#20242A"
+    Shell.TabBarUnselectedColor="#98A2B3"
     Shell.NavBarHasShadow="True">
 
     <ShellContent

@@ -1,7 +1,4 @@
-﻿using Microcharts;
-using JustMeetinPoint.Maui.Features.Home.Factories;
-
-namespace JustMeetinPoint.Maui.Features.Home.ViewModels;
+﻿namespace JustMeetinPoint.Maui.Features.Home.ViewModels;
 
 public class ProfileViewModel
 {
@@ -13,11 +10,4 @@ public class ProfileViewModel
     public string CompletedGroups { get; set; } = "8";
     public string AvgTravelTimeText { get; set; } = "27 min";
     public string LastActivityText { get; set; } = "Hoy";
-
-    public Chart UserStatsChart { get; }
-
-    public ProfileViewModel()
-    {
-        UserStatsChart = UserStatsChartFactory.CreatePlaceholder();
-    }
 }

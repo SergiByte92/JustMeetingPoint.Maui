@@ -4,7 +4,10 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:authViews="clr-namespace:JustMeetinPoint.Maui.Features.Auth.Views"
-    xmlns:homeViews="clr-namespace:JustMeetinPoint.Maui.Features.Home.Views"
+    xmlns:dashboardViews="clr-namespace:JustMeetinPoint.Maui.Features.Dashboard.Views"
+    xmlns:groupViews="clr-namespace:JustMeetinPoint.Maui.Features.Groups.Views"
+    xmlns:mapViews="clr-namespace:JustMeetinPoint.Maui.Features.Map.Views"
+    xmlns:profileViews="clr-namespace:JustMeetinPoint.Maui.Features.Profile.Views"
     Shell.FlyoutBehavior="Disabled"
     Shell.BackgroundColor="#FFFFFF"
     Shell.ForegroundColor="#20242A"
@@ -35,26 +38,25 @@
         <ShellContent
             Title="Inicio"
             Icon="home.png"
-            ContentTemplate="{DataTemplate homeViews:HomeView}"
+            ContentTemplate="{DataTemplate dashboardViews:HomeView}"
             Route="home" />
 
         <ShellContent
             Title="Quedadas"
             Icon="group.png"
-            ContentTemplate="{DataTemplate homeViews:GroupsView}"
+            ContentTemplate="{DataTemplate groupViews:GroupsView}"
             Route="groups" />
 
         <ShellContent
             Title="Mapa"
             Icon="map.png"
-            ContentTemplate="{DataTemplate homeViews:MapView}"
+            ContentTemplate="{DataTemplate mapViews:MapView}"
             Route="map" />
 
         <ShellContent
             Title="Perfil"
             Icon="profile.png"
-            ContentTemplate="{DataTemplate homeViews:ProfileView}"
+            ContentTemplate="{DataTemplate profileViews:ProfileView}"
             Route="profile" />
-
     </TabBar>
 </Shell>

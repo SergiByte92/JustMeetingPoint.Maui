@@ -58,5 +58,6 @@
             Icon="profile.png"
             ContentTemplate="{DataTemplate profileViews:ProfileView}"
             Route="profile" />
+        
     </TabBar>
 </Shell>

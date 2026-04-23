@@ -1,156 +1,232 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage
+    x:Class="JustMeetinPoint.Maui.Features.Groups.Views.GroupLobbyView"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    x:Class="JustMeetinPoint.Maui.Features.Groups.Views.GroupLobbyView"
     Title="Lobby"
-    BackgroundColor="#F6F7F9"
-    Shell.TabBarIsVisible="False">
+    BackgroundColor="#F7F8FA"
+    Shell.NavBarIsVisible="True">
 
     <ScrollView>
-        <VerticalStackLayout Padding="20,20,20,28" Spacing="22">
+        <VerticalStackLayout
+            Padding="24,20,24,32"
+            Spacing="18">
 
-            <!-- Stepper -->
-            <HorizontalStackLayout
+            <!-- Stepper superior -->
+            <Grid
+                ColumnDefinitions="*,Auto,*,Auto,*"
+                VerticalOptions="Center"
                 HorizontalOptions="Center"
-                Spacing="8">
+                Margin="0,6,0,8">
 
-                <Border
-                    WidthRequest="12"
-                    HeightRequest="12"
-                    BackgroundColor="{Binding Step1Color}"
-                    StrokeThickness="0"
-                    StrokeShape="RoundRectangle 6" />
+                <BoxView Grid.Column="0"
+                         HeightRequest="4"
+                         WidthRequest="36"
+                         CornerRadius="2"
+                         Color="{Binding Step1Color}"
+                         VerticalOptions="Center" />
 
-                <BoxView
-                    WidthRequest="36"
-                    HeightRequest="2"
-                    Color="#D9DEE5"
-                    VerticalOptions="Center" />
+                <Ellipse Grid.Column="1"
+                         WidthRequest="12"
+                         HeightRequest="12"
+                         Fill="{Binding Step1Color}"
+                         VerticalOptions="Center"
+                         HorizontalOptions="Center" />
 
-                <Border
-                    WidthRequest="12"
-                    HeightRequest="12"
-                    BackgroundColor="{Binding Step2Color}"
-                    StrokeThickness="0"
-                    StrokeShape="RoundRectangle 6" />
+                <BoxView Grid.Column="2"
+                         HeightRequest="4"
+                         WidthRequest="36"
+                         CornerRadius="2"
+                         Color="{Binding Step2Color}"
+                         VerticalOptions="Center" />
 
-                <BoxView
-                    WidthRequest="36"
-                    HeightRequest="2"
-                    Color="#D9DEE5"
-                    VerticalOptions="Center" />
+                <Ellipse Grid.Column="3"
+                         WidthRequest="12"
+                         HeightRequest="12"
+                         Fill="{Binding Step2Color}"
+                         VerticalOptions="Center"
+                         HorizontalOptions="Center" />
 
-                <Border
-                    WidthRequest="12"
-                    HeightRequest="12"
-                    BackgroundColor="{Binding Step3Color}"
-                    StrokeThickness="0"
-                    StrokeShape="RoundRectangle 6" />
-            </HorizontalStackLayout>
+                <BoxView Grid.Column="4"
+                         HeightRequest="4"
+                         WidthRequest="36"
+                         CornerRadius="2"
+                         Color="{Binding Step3Color}"
+                         VerticalOptions="Center" />
+            </Grid>
 
-            <!-- Header -->
-            <VerticalStackLayout Spacing="6">
+            <!-- Título -->
+            <VerticalStackLayout Spacing="4">
                 <Label
                     Text="{Binding LobbyTitle}"
-                    FontSize="28"
+                    FontSize="34"
                     FontAttributes="Bold"
-                    TextColor="#20242A" />
+                    TextColor="#1F1F1F" />
 
                 <Label
-                    Text="{Binding LobbySubtitle}"
+                    Text="{Binding RoleText}"
                     FontSize="14"
-                    TextColor="#667085" />
+                    TextColor="#6B7280" />
             </VerticalStackLayout>
 
             <!-- Código -->
-            <VerticalStackLayout Spacing="8">
-                <Label
-                    Text="Código del grupo"
-                    FontSize="13"
-                    FontAttributes="Bold"
-                    TextColor="#20242A" />
+            <Frame
+                Padding="18"
+                CornerRadius="18"
+                BackgroundColor="White"
+                BorderColor="#E6EAF0"
+                HasShadow="False">
 
-                <Border
-                    BackgroundColor="#FFFFFF"
-                    Stroke="#D9DEE5"
-                    StrokeThickness="1"
-                    StrokeShape="RoundRectangle 16"
-                    Padding="18">
+                <VerticalStackLayout Spacing="10">
+                    <Label
+                        Text="Código del grupo"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        TextColor="#374151" />
 
                     <Label
                         Text="{Binding GroupCode}"
-                        FontSize="30"
+                        FontSize="24"
                         FontAttributes="Bold"
-                        TextColor="#163E73"
-                        HorizontalOptions="Center" />
-                </Border>
-            </VerticalStackLayout>
+                        TextColor="#234A84"
+                        HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Frame>
 
-            <!-- Estado -->
-            <VerticalStackLayout Spacing="8">
-                <Label
-                    Text="Estado"
-                    FontSize="13"
-                    FontAttributes="Bold"
-                    TextColor="#20242A" />
+            <!-- Resumen rápido -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <Frame
+                    Grid.Column="0"
+                    Padding="16"
+                    CornerRadius="18"
+                    BackgroundColor="White"
+                    BorderColor="#E6EAF0"
+                    HasShadow="False">
 
-                <Border
-                    BackgroundColor="#FFFFFF"
-                    Stroke="#D9DEE5"
-                    StrokeThickness="1"
-                    StrokeShape="RoundRectangle 16"
-                    Padding="18">
-
-                    <VerticalStackLayout Spacing="8">
+                    <VerticalStackLayout Spacing="6">
                         <Label
-                            Text="{Binding PrimaryStatusText}"
+                            Text="Participantes"
+                            FontSize="13"
+                            TextColor="#6B7280" />
+
+                        <Label
+                            Text="{Binding ParticipantsText}"
                             FontSize="18"
                             FontAttributes="Bold"
-                            TextColor="#20242A" />
+                            TextColor="#1F1F1F" />
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Frame
+                    Grid.Column="1"
+                    Padding="16"
+                    CornerRadius="18"
+                    BackgroundColor="White"
+                    BorderColor="#E6EAF0"
+                    HasShadow="False">
+
+                    <VerticalStackLayout Spacing="6">
+                        <Label
+                            Text="Rol"
+                            FontSize="13"
+                            TextColor="#6B7280" />
 
                         <Label
-                            Text="{Binding SecondaryStatusText}"
-                            FontSize="13"
-                            TextColor="#667085" />
-
-                        <ActivityIndicator
-                            IsVisible="{Binding IsCalculating}"
-                            IsRunning="{Binding IsCalculating}"
-                            Color="#1F5FBF"
-                            Margin="0,4,0,0" />
+                            Text="{Binding RoleText}"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            TextColor="#1F1F1F" />
                     </VerticalStackLayout>
-                </Border>
-            </VerticalStackLayout>
+                </Frame>
+            </Grid>
 
-            <!-- Acción principal -->
+            <!-- Estado principal -->
+            <Frame
+                Padding="18"
+                CornerRadius="20"
+                BackgroundColor="White"
+                BorderColor="#E6EAF0"
+                HasShadow="False">
+
+                <VerticalStackLayout Spacing="14">
+
+                    <VerticalStackLayout Spacing="4">
+                        <Label
+                            Text="Estado"
+                            FontSize="14"
+                            FontAttributes="Bold"
+                            TextColor="#374151" />
+
+                        <Label
+                            Text="{Binding CurrentStatus}"
+                            FontSize="22"
+                            FontAttributes="Bold"
+                            TextColor="#1F1F1F" />
+
+                        <Label
+                            Text="{Binding CurrentSubStatus}"
+                            FontSize="14"
+                            TextColor="#6B7280" />
+                    </VerticalStackLayout>
+
+                    <ProgressBar
+                        Progress="{Binding ProgressValue}"
+                        HeightRequest="8"
+                        BackgroundColor="#E5E7EB"
+                        ProgressColor="#2F67C7" />
+
+                    <ActivityIndicator
+                        IsVisible="{Binding IsCalculating}"
+                        IsRunning="{Binding IsCalculating}"
+                        Color="#2F67C7"
+                        HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Error -->
+            <Frame
+                Padding="16"
+                CornerRadius="16"
+                BackgroundColor="#FFF5F5"
+                BorderColor="#F5C2C7"
+                HasShadow="False"
+                IsVisible="{Binding HasError}">
+
+                <VerticalStackLayout Spacing="6">
+                    <Label
+                        Text="Se ha producido un error"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        TextColor="#B42318" />
+
+                    <Label
+                        Text="{Binding ErrorMessage}"
+                        FontSize="14"
+                        TextColor="#7A271A" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Botones -->
             <Button
                 Text="Iniciar grupo"
                 Command="{Binding StartCommand}"
                 IsVisible="{Binding CanStartGroup}"
-                HeightRequest="52"
-                CornerRadius="14"
-                BackgroundColor="#1F5FBF"
-                TextColor="#FFFFFF"
-                FontAttributes="Bold" />
+                BackgroundColor="#2F67C7"
+                TextColor="White"
+                FontAttributes="Bold"
+                CornerRadius="16"
+                HeightRequest="56" />
 
-            <!-- Salir -->
             <Button
                 Text="Salir del grupo"
                 Command="{Binding LeaveGroupCommand}"
-                HeightRequest="50"
-                CornerRadius="14"
-                BackgroundColor="#FFFFFF"
-                TextColor="#D92D20"
-                BorderColor="#F3D6D2"
-                BorderWidth="1" />
+                BackgroundColor="White"
+                TextColor="#D84B4B"
+                BorderColor="#F2B6B6"
+                BorderWidth="1.2"
+                CornerRadius="16"
+                HeightRequest="56" />
 
-            <!-- Error -->
-            <Label
-                Text="{Binding ErrorMessage}"
-                TextColor="#D92D20"
-                FontSize="13"
-                IsVisible="{Binding HasError}" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

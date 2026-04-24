@@ -1,13 +1,20 @@
 ﻿using CommunityToolkit.Maui;
+
 using JustMeetinPoint.Maui.Features.Auth.Services;
 using JustMeetinPoint.Maui.Features.Auth.ViewModels;
 using JustMeetinPoint.Maui.Features.Auth.Views;
+
+using JustMeetinPoint.Maui.Features.Dashboard.Services;
+using JustMeetinPoint.Maui.Features.Dashboard.ViewModels;
 using JustMeetinPoint.Maui.Features.Dashboard.Views;
+
 using JustMeetinPoint.Maui.Features.Groups.Services;
 using JustMeetinPoint.Maui.Features.Groups.ViewModels;
 using JustMeetinPoint.Maui.Features.Groups.Views;
+
 using JustMeetinPoint.Maui.Features.Map.ViewModels;
 using JustMeetinPoint.Maui.Features.Map.Views;
+
 using JustMeetinPoint.Maui.Features.Profile.Views;
 using JustMeetinPoint.Maui.Features.Shared.Services;
 
@@ -28,6 +35,10 @@ public static class MauiProgram
         builder.Services.AddSingleton<IGroupService, GroupService>();
         builder.Services.AddSingleton<IMeetingStateService, MeetingStateService>();
 
+        // Servicio específico del Home.
+        // Usa el socket autenticado para pedir datos básicos al servidor.
+        builder.Services.AddSingleton<IHomeService, HomeService>();
+
         // ── VIEWMODELS ────────────────────────────────────────────────────────
         builder.Services.AddTransient<LoginViewModel>();
         builder.Services.AddTransient<RegisterViewModel>();
@@ -35,6 +46,7 @@ public static class MauiProgram
         builder.Services.AddTransient<GroupLobbyViewModel>();
         builder.Services.AddTransient<MapViewModel>();
         builder.Services.AddTransient<CreateGroupViewModel>();
+        builder.Services.AddTransient<HomeViewModel>();
 
         // ── VIEWS ─────────────────────────────────────────────────────────────
         builder.Services.AddTransient<LoginView>();
@@ -45,6 +57,8 @@ public static class MauiProgram
         builder.Services.AddTransient<HomeView>();
         builder.Services.AddTransient<ProfileView>();
         builder.Services.AddTransient<CreateGroupView>();
+
+ 
 
         return builder.Build();
     }

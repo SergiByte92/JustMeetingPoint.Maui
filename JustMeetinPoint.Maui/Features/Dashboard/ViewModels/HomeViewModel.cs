@@ -1,16 +1,99 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using JustMeetinPoint.Maui.Features.Dashboard.Services;
 
-namespace JustMeetinPoint.Maui.Features.Dashboard.ViewModels
+namespace JustMeetinPoint.Maui.Features.Dashboard.ViewModels;
+
+public partial class HomeViewModel : ObservableObject
 {
-public class HomeViewModel
-{
-    public string GreetingText => "Hola, Sergi 👋";
-    public string SubtitleText => "¿Dónde quedamos hoy?";
-    public string MainCtaTitle => "Organiza una nueva quedada";
-    public string MainCtaSubtitle => "Crea un grupo, comparte el código y encuentra el punto más justo.";
-}
+    private readonly IHomeService _homeService;
+
+    [ObservableProperty]
+    private string username = string.Empty;
+
+    [ObservableProperty]
+    private bool isBusy;
+
+    [ObservableProperty]
+    private string errorMessage = string.Empty;
+
+    public HomeViewModel(IHomeService homeService)
+    {
+        _homeService = homeService;
+    }
+
+    public string GreetingText =>
+        string.IsNullOrWhiteSpace(Username)
+            ? "Hola"
+            : $"Hola, {Username}";
+
+    public string SubtitleText =>
+        "Encuentra el mejor punto para todos.";
+
+    public string MainCtaTitle =>
+        "¿Listos para vuestra próxima quedada?";
+
+    public string MainCtaSubtitle =>
+        "Gestiona tu grupo, comparte ubicaciones y deja que JMP calcule el punto más equilibrado.";
+
+    public string PrimaryButtonText =>
+        "Ir al grupo";
+
+    public string QuickActionTitle =>
+        "Acciones rápidas";
+
+    public bool HasError =>
+        !string.IsNullOrWhiteSpace(ErrorMessage);
+
+    partial void OnUsernameChanged(string value)
+    {
+        OnPropertyChanged(nameof(GreetingText));
+    }
+
+    partial void OnErrorMessageChanged(string value)
+    {
+        OnPropertyChanged(nameof(HasError));
+    }
+
+    [RelayCommand]
+    public async Task LoadAsync()
+    {
+        if (IsBusy)
+            return;
+
+        try
+        {
+            IsBusy = true;
+            ErrorMessage = string.Empty;
+
+            Username = await _homeService.GetUsernameAsync();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "No se pudieron cargar los datos de inicio.";
+            Console.WriteLine($"[HomeViewModel] Error LoadAsync: {ex}");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task GoToActiveGroupAsync()
+    {
+        await Shell.Current.GoToAsync("//main/groups");
+    }
+
+    [RelayCommand]
+    private async Task GoToCreateGroupAsync()
+    {
+        await Shell.Current.GoToAsync("//main/groups/create");
+    }
+
+    [RelayCommand]
+    private async Task GoToGroupsAsync()
+    {
+        await Shell.Current.GoToAsync("//main/groups");
+    }
 }

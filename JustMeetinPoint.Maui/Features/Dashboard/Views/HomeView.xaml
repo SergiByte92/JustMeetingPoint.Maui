@@ -1,243 +1,330 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage
+    x:Class="JustMeetinPoint.Maui.Features.Dashboard.Views.HomeView"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    x:Class="JustMeetinPoint.Maui.Features.Dashboard.Views.HomeView"
+    xmlns:vm="clr-namespace:JustMeetinPoint.Maui.Features.Dashboard.ViewModels"
+    x:DataType="vm:HomeViewModel"
     Title="Inicio"
-    BackgroundColor="#F6F7F9">
+    BackgroundColor="#F3F4F6">
 
-    <ScrollView>
-        <VerticalStackLayout Spacing="0">
+    <ContentPage.Resources>
 
-            <!-- HERO SUPERIOR -->
-            <Border
-                BackgroundColor="#FFFFFF"
-                Stroke="#D9DEE5"
-                StrokeThickness="1"
-                Padding="20,18,20,18">
+        <Style x:Key="M3ElevatedCard" TargetType="Border">
+            <Setter Property="BackgroundColor" Value="#FFFFFF" />
+            <Setter Property="StrokeThickness" Value="0" />
+            <Setter Property="Padding" Value="20" />
+            <Setter Property="StrokeShape">
+                <Setter.Value>
+                    <RoundRectangle CornerRadius="16" />
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Shadow">
+                <Setter.Value>
+                    <Shadow Brush="#000000"
+                            Opacity="0.08"
+                            Offset="0,3"
+                            Radius="8" />
+                </Setter.Value>
+            </Setter>
+        </Style>
 
+        <Style x:Key="M3OutlinedCard" TargetType="Border">
+            <Setter Property="BackgroundColor" Value="#FFFFFF" />
+            <Setter Property="Stroke" Value="#E5E7EB" />
+            <Setter Property="StrokeThickness" Value="1" />
+            <Setter Property="Padding" Value="16" />
+            <Setter Property="StrokeShape">
+                <Setter.Value>
+                    <RoundRectangle CornerRadius="16" />
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="M3PrimaryButton" TargetType="Button">
+            <Setter Property="BackgroundColor" Value="#0B2545" />
+            <Setter Property="TextColor" Value="#FFFFFF" />
+            <Setter Property="CornerRadius" Value="14" />
+            <Setter Property="HeightRequest" Value="48" />
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="FontSize" Value="14" />
+        </Style>
+
+        <Style x:Key="M3SecondaryText" TargetType="Label">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="TextColor" Value="#64748B" />
+            <Setter Property="LineBreakMode" Value="WordWrap" />
+        </Style>
+
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="*">
+
+        <ScrollView>
+            <VerticalStackLayout Padding="16,20,16,28" Spacing="16">
+
+                <!-- SALUDO -->
                 <VerticalStackLayout Spacing="4">
                     <Label
-                        Text="Hola, Sergi"
-                        FontSize="24"
+                        Text="{Binding GreetingText}"
+                        FontSize="28"
                         FontAttributes="Bold"
-                        TextColor="#20242A" />
+                        TextColor="#0B2545" />
 
                     <Label
-                        Text="¿Dónde quedamos hoy?"
-                        FontSize="14"
-                        TextColor="#667085" />
+                        Text="{Binding SubtitleText}"
+                        Style="{StaticResource M3SecondaryText}" />
                 </VerticalStackLayout>
-            </Border>
 
-            <!-- CTA PRINCIPAL -->
-            <Border
-                Margin="12,12,12,0"
-                BackgroundColor="#1F5FBF"
-                StrokeThickness="0"
-                StrokeShape="RoundRectangle 16"
-                Padding="18">
+                <!-- ERROR -->
+                <Border
+                    Style="{StaticResource M3OutlinedCard}"
+                    IsVisible="{Binding HasError}"
+                    BackgroundColor="#FFF7F7"
+                    Stroke="#FCA5A5">
 
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                    <Label
+                        Text="{Binding ErrorMessage}"
+                        FontSize="13"
+                        TextColor="#B91C1C" />
+                </Border>
 
-                    <VerticalStackLayout Spacing="8">
-                        <Label
-                            Text="Organiza una nueva quedada"
-                            FontSize="16"
-                            FontAttributes="Bold"
-                            TextColor="#FFFFFF" />
+                <!-- CTA PRINCIPAL -->
+                <Border Style="{StaticResource M3ElevatedCard}">
+                    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="12">
 
-                        <Label
-                            Text="Crea un grupo, comparte el código y encuentra el punto de encuentro más equilibrado."
-                            FontSize="12"
-                            TextColor="#DCE6F5"
-                            LineBreakMode="WordWrap" />
+                        <VerticalStackLayout Grid.Row="0" Spacing="6">
+                            <Label
+                                Text="{Binding MainCtaTitle}"
+                                FontSize="20"
+                                FontAttributes="Bold"
+                                TextColor="#202124" />
+
+                            <Label
+                                Text="{Binding MainCtaSubtitle}"
+                                Style="{StaticResource M3SecondaryText}" />
+                        </VerticalStackLayout>
 
                         <Button
-                            Text="Crear grupo"
-                            Margin="0,10,0,0"
-                            WidthRequest="140"
-                            HeightRequest="42"
-                            BackgroundColor="#FFFFFF"
-                            TextColor="#163E73"
-                            FontAttributes="Bold"
-                            CornerRadius="12"
-                            HorizontalOptions="Start" />
-                    </VerticalStackLayout>
+                            Grid.Row="1"
+                            Text="{Binding PrimaryButtonText}"
+                            Style="{StaticResource M3PrimaryButton}"
+                            Command="{Binding GoToActiveGroupCommand}" />
 
-                    <!-- Acento decorativo sobrio -->
-                    <Border
-                        Grid.Column="1"
-                        WidthRequest="10"
-                        HeightRequest="10"
-                        BackgroundColor="#9BB7E3"
-                        StrokeThickness="0"
-                        StrokeShape="RoundRectangle 5"
-                        VerticalOptions="Center"
-                        HorizontalOptions="End"
-                        Opacity="0.85" />
-                </Grid>
-            </Border>
+                        <ActivityIndicator
+                            Grid.Row="2"
+                            IsRunning="{Binding IsBusy}"
+                            IsVisible="{Binding IsBusy}"
+                            Color="#0B2545"
+                            HorizontalOptions="Center" />
 
-            <!-- HEADER SECCIÓN -->
-            <Grid
-                Padding="16,18,16,8"
-                ColumnDefinitions="*,Auto">
+                    </Grid>
+                </Border>
 
-                <Label
-                    Text="Sugerencias para hoy"
-                    FontSize="15"
-                    FontAttributes="Bold"
-                    TextColor="#20242A" />
+                <!-- VALUE CARDS -->
+                <VerticalStackLayout Spacing="12">
 
-                <Label
-                    Grid.Column="1"
-                    Text="Ver más"
+                    <Label
+        Text="Para una quedada perfecta"
+        FontSize="17"
+        FontAttributes="Bold"
+        TextColor="#0B2545" />
+
+                    <Grid
+        ColumnDefinitions="*,*,*"
+        ColumnSpacing="10">
+
+                        <!-- CARD 1 -->
+                        <Border
+            Grid.Column="0"
+            BackgroundColor="#FFFFFF"
+            Stroke="#E5E7EB"
+            StrokeThickness="1"
+            Padding="10"
+            MinimumHeightRequest="150">
+
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="18" />
+                            </Border.StrokeShape>
+
+                            <Border.Shadow>
+                                <Shadow Brush="#000000"
+                        Opacity="0.05"
+                        Offset="0,2"
+                        Radius="6" />
+                            </Border.Shadow>
+
+                            <VerticalStackLayout
+                Spacing="8"
+                HorizontalOptions="Center"
+                VerticalOptions="Center">
+
+                                <Border
+                    WidthRequest="58"
+                    HeightRequest="58"
+                    BackgroundColor="#F1F0FB"
+                    StrokeThickness="0"
+                    HorizontalOptions="Center">
+
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="29" />
+                                    </Border.StrokeShape>
+
+                                    <Image
+                        Source="balance.svg"
+                        WidthRequest="34"
+                        HeightRequest="34"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                                </Border>
+
+                                <Label
+                    Text="Punto justo"
                     FontSize="12"
-                    TextColor="#1F5FBF"
-                    VerticalOptions="End" />
-            </Grid>
+                    FontAttributes="Bold"
+                    TextColor="#0B2545"
+                    HorizontalTextAlignment="Center"
+                    LineBreakMode="TailTruncation" />
 
-            <!-- CHIPS SOBRIOS -->
-            <ScrollView
-                Orientation="Horizontal"
-                Margin="12,0,0,0"
-                HorizontalScrollBarVisibility="Never">
+                                <Label
+                    Text="Equilibrado"
+                    FontSize="10"
+                    TextColor="#64748B"
+                    HorizontalTextAlignment="Center"
+                    LineBreakMode="TailTruncation" />
 
-                <HorizontalStackLayout Spacing="8" Padding="0,0,12,0">
+                            </VerticalStackLayout>
+                        </Border>
 
-                    <Border
-                        BackgroundColor="#EAF1FB"
-                        Stroke="#1F5FBF"
-                        StrokeThickness="1"
-                        StrokeShape="RoundRectangle 20"
-                        Padding="14,8">
-                        <Label
-                            Text="Comer"
-                            FontSize="12"
-                            FontAttributes="Bold"
-                            TextColor="#1F5FBF" />
-                    </Border>
+                        <!-- CARD 2 -->
+                        <Border
+            Grid.Column="1"
+            BackgroundColor="#FFFFFF"
+            Stroke="#E5E7EB"
+            StrokeThickness="1"
+            Padding="10"
+            MinimumHeightRequest="150">
 
-                    <Border
-                        BackgroundColor="#FFFFFF"
-                        Stroke="#D9DEE5"
-                        StrokeThickness="1"
-                        StrokeShape="RoundRectangle 20"
-                        Padding="14,8">
-                        <Label
-                            Text="Café"
-                            FontSize="12"
-                            TextColor="#20242A" />
-                    </Border>
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="18" />
+                            </Border.StrokeShape>
 
-                    <Border
-                        BackgroundColor="#FFFFFF"
-                        Stroke="#D9DEE5"
-                        StrokeThickness="1"
-                        StrokeShape="RoundRectangle 20"
-                        Padding="14,8">
-                        <Label
-                            Text="Ocio"
-                            FontSize="12"
-                            TextColor="#20242A" />
-                    </Border>
+                            <Border.Shadow>
+                                <Shadow Brush="#000000"
+                        Opacity="0.05"
+                        Offset="0,2"
+                        Radius="6" />
+                            </Border.Shadow>
 
-                    <Border
-                        BackgroundColor="#FFFFFF"
-                        Stroke="#D9DEE5"
-                        StrokeThickness="1"
-                        StrokeShape="RoundRectangle 20"
-                        Padding="14,8">
-                        <Label
-                            Text="Deporte"
-                            FontSize="12"
-                            TextColor="#20242A" />
-                    </Border>
+                            <VerticalStackLayout
+                Spacing="8"
+                HorizontalOptions="Center"
+                VerticalOptions="Center">
 
-                </HorizontalStackLayout>
-            </ScrollView>
+                                <Border
+                    WidthRequest="58"
+                    HeightRequest="58"
+                    BackgroundColor="#EEF6FF"
+                    StrokeThickness="0"
+                    HorizontalOptions="Center">
 
-            <!-- CARD 1 -->
-            <Border
-                Margin="12,12,12,0"
-                BackgroundColor="#FFFFFF"
-                Stroke="#D9DEE5"
-                StrokeThickness="1"
-                StrokeShape="RoundRectangle 14"
-                Padding="14">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="29" />
+                                    </Border.StrokeShape>
 
-                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                    <Border
-                        WidthRequest="40"
-                        HeightRequest="40"
-                        BackgroundColor="#EEF2F6"
-                        StrokeThickness="0"
-                        StrokeShape="RoundRectangle 12">
-                        <BoxView
-                            WidthRequest="14"
-                            HeightRequest="14"
-                            CornerRadius="7"
-                            Color="#1F5FBF"
-                            HorizontalOptions="Center"
-                            VerticalOptions="Center" />
-                    </Border>
+                                    <Image
+                        Source="route.svg"
+                        WidthRequest="34"
+                        HeightRequest="34"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                                </Border>
 
-                    <VerticalStackLayout Grid.Column="1" Spacing="2">
-                        <Label
-                            Text="Actividades para grupos pequeños"
-                            FontSize="13"
-                            FontAttributes="Bold"
-                            TextColor="#20242A" />
+                                <Label
+                    Text="Menos vueltas"
+                    FontSize="12"
+                    FontAttributes="Bold"
+                    TextColor="#0B2545"
+                    HorizontalTextAlignment="Center"
+                    LineBreakMode="TailTruncation" />
 
-                        <Label
-                            Text="Propuestas rápidas para reuniones de baja fricción."
-                            FontSize="11"
-                            TextColor="#667085" />
-                    </VerticalStackLayout>
-                </Grid>
-            </Border>
+                                <Label
+                    Text="Rutas directas"
+                    FontSize="10"
+                    TextColor="#64748B"
+                    HorizontalTextAlignment="Center"
+                    LineBreakMode="TailTruncation" />
 
-            <!-- CARD 2 -->
-            <Border
-                Margin="12,8,12,20"
-                BackgroundColor="#FFFFFF"
-                Stroke="#D9DEE5"
-                StrokeThickness="1"
-                StrokeShape="RoundRectangle 14"
-                Padding="14">
+                            </VerticalStackLayout>
+                        </Border>
 
-                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                    <Border
-                        WidthRequest="40"
-                        HeightRequest="40"
-                        BackgroundColor="#EEF2F6"
-                        StrokeThickness="0"
-                        StrokeShape="RoundRectangle 12">
-                        <BoxView
-                            WidthRequest="14"
-                            HeightRequest="14"
-                            CornerRadius="7"
-                            Color="#667085"
-                            HorizontalOptions="Center"
-                            VerticalOptions="Center" />
-                    </Border>
+                        <!-- CARD 3 -->
+                        <Border
+            Grid.Column="2"
+            BackgroundColor="#FFFFFF"
+            Stroke="#E5E7EB"
+            StrokeThickness="1"
+            Padding="10"
+            MinimumHeightRequest="150">
 
-                    <VerticalStackLayout Grid.Column="1" Spacing="2">
-                        <Label
-                            Text="Sugerencia de punto final"
-                            FontSize="13"
-                            FontAttributes="Bold"
-                            TextColor="#20242A" />
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="18" />
+                            </Border.StrokeShape>
 
-                        <Label
-                            Text="Aquí podrás mostrar locales o puntos de interés cercanos al resultado."
-                            FontSize="11"
-                            TextColor="#667085" />
-                    </VerticalStackLayout>
-                </Grid>
-            </Border>
+                            <Border.Shadow>
+                                <Shadow Brush="#000000"
+                        Opacity="0.05"
+                        Offset="0,2"
+                        Radius="6" />
+                            </Border.Shadow>
 
-        </VerticalStackLayout>
-    </ScrollView>
+                            <VerticalStackLayout
+                Spacing="8"
+                HorizontalOptions="Center"
+                VerticalOptions="Center">
+
+                                <Border
+                    WidthRequest="58"
+                    HeightRequest="58"
+                    BackgroundColor="#ECFDF5"
+                    StrokeThickness="0"
+                    HorizontalOptions="Center">
+
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="29" />
+                                    </Border.StrokeShape>
+
+                                    <Image
+                        Source="groups.png"
+                        WidthRequest="34"
+                        HeightRequest="34"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                                </Border>
+
+                                <Label
+                    Text="Grupo listo"
+                    FontSize="12"
+                    FontAttributes="Bold"
+                    TextColor="#0B2545"
+                    HorizontalTextAlignment="Center"
+                    LineBreakMode="TailTruncation" />
+
+                                <Label
+                    Text="Coordinados"
+                    FontSize="10"
+                    TextColor="#64748B"
+                    HorizontalTextAlignment="Center"
+                    LineBreakMode="TailTruncation" />
+
+                            </VerticalStackLayout>
+                        </Border>
+
+                    </Grid>
+
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </Grid>
 </ContentPage>

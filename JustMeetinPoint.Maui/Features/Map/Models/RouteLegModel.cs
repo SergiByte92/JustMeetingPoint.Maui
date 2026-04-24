@@ -1,8 +1,16 @@
 ﻿namespace JustMeetinPoint.Maui.Features.Map.Models;
 
 /// <summary>
-/// Tramo de ruta recibido desde el servidor.
-/// Puede representar caminar, bus, metro, tren, etc.
+/// Representa un tramo de la ruta en cliente.
+/// 
+/// Cada leg puede ser:
+/// - WALK
+/// - BUS
+/// - RAIL
+/// - SUBWAY
+/// - etc.
+/// 
+/// Este modelo se usa directamente en el CollectionView del mapa.
 /// </summary>
 public sealed class RouteLegModel
 {
@@ -20,12 +28,45 @@ public sealed class RouteLegModel
 
     public string? EncodedPolyline { get; set; }
 
-    public string DurationText =>
-        DurationSeconds <= 0 ? "Duración no disponible" : $"{DurationSeconds / 60} min";
+    /// <summary>
+    /// Duración formateada para UI.
+    /// </summary>
+    public string DurationText
+    {
+        get
+        {
+            if (DurationSeconds <= 0)
+                return "Duración no disponible";
 
-    public string DistanceText =>
-        DistanceMeters <= 0 ? "Distancia no disponible" : $"{DistanceMeters / 1000:0.0} km";
+            int minutes = DurationSeconds / 60;
 
+            if (minutes <= 0)
+                return $"{DurationSeconds} seg";
+
+            return $"{minutes} min";
+        }
+    }
+
+    /// <summary>
+    /// Distancia formateada para UI.
+    /// </summary>
+    public string DistanceText
+    {
+        get
+        {
+            if (DistanceMeters <= 0)
+                return "Distancia no disponible";
+
+            if (DistanceMeters < 1000)
+                return $"{DistanceMeters:0} m";
+
+            return $"{DistanceMeters / 1000:0.0} km";
+        }
+    }
+
+    /// <summary>
+    /// Título principal del tramo.
+    /// </summary>
     public string DisplayTitle
     {
         get
@@ -36,10 +77,17 @@ public sealed class RouteLegModel
             if (!string.IsNullOrWhiteSpace(PublicCode))
                 return $"{Mode} {PublicCode}";
 
-            return Mode;
+            return string.IsNullOrWhiteSpace(Mode) ? "Tramo" : Mode;
         }
     }
 
+    /// <summary>
+    /// Subtítulo del tramo.
+    /// Prioridad:
+    /// - dirección del transporte
+    /// - nombre de línea
+    /// - origen → destino
+    /// </summary>
     public string DisplaySubtitle
     {
         get
@@ -50,7 +98,10 @@ public sealed class RouteLegModel
             if (!string.IsNullOrWhiteSpace(LineName))
                 return LineName;
 
-            return $"{FromName} → {ToName}";
+            if (!string.IsNullOrWhiteSpace(FromName) || !string.IsNullOrWhiteSpace(ToName))
+                return $"{FromName} → {ToName}";
+
+            return "Detalle no disponible";
         }
     }
 }

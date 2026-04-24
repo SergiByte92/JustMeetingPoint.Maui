@@ -201,14 +201,31 @@
                                 FontAttributes="Bold"
                                 TextColor="#0B2545" />
 
+                            <!--
+                                Antes usabas InvertedBoolConverter.
+                                Como no está declarado en App.xaml, podía romper la carga de la vista.
+                                Ahora usamos una propiedad segura del ViewModel: ShowNoItineraryMessage.
+                            -->
                             <Label
                                 Text="No hay detalle de itinerario disponible."
                                 FontSize="13"
                                 TextColor="#64748B"
-                                IsVisible="{Binding HasItinerary, Converter={StaticResource InvertedBoolConverter}}" />
+                                IsVisible="{Binding ShowNoItineraryMessage}" />
 
+                            <!--
+                                Antes:
+                                    ItemsSource="{Binding Itinerary.Legs}"
+
+                                Problema:
+                                    Itinerary puede ser null al construir la vista.
+
+                                Ahora:
+                                    ItemsSource="{Binding Legs}"
+
+                                Legs siempre devuelve una lista, aunque esté vacía.
+                            -->
                             <CollectionView
-                                ItemsSource="{Binding Itinerary.Legs}"
+                                ItemsSource="{Binding Legs}"
                                 IsVisible="{Binding HasItinerary}"
                                 SelectionMode="None">
 
@@ -225,7 +242,7 @@
 
                                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
 
-                                                <!-- ICONO / MODO -->
+                                                <!-- MODO -->
                                                 <Border
                                                     WidthRequest="42"
                                                     HeightRequest="42"
@@ -244,7 +261,7 @@
                                                         HorizontalTextAlignment="Center" />
                                                 </Border>
 
-                                                <!-- CONTENIDO -->
+                                                <!-- CONTENIDO DEL TRAMO -->
                                                 <VerticalStackLayout Grid.Column="1" Spacing="4">
 
                                                     <Label

@@ -56,6 +56,8 @@ public class GroupService : IGroupService
 
             string groupCode = SocketTools.receiveString(socket);
 
+            // El servidor, tras crear el grupo, vuelve al bucle del lobby y envía
+            // la cabecera estándar antes de esperar la siguiente opción.
             bool sessionValid = SocketTools.receiveBool(socket);
 
             if (!sessionValid)
@@ -112,7 +114,7 @@ public class GroupService : IGroupService
         {
             Socket socket = GetAuthenticatedSocket();
 
-            Console.WriteLine($"[GroupService] RefreshLobbyAsync -> Group={groupCode}, Host={isCurrentUserHost}");
+            Console.WriteLine($"[GroupService] RefreshLobbyAsync -> Group={groupCode}");
 
             SocketTools.sendInt(socket, LobbyOptionRefresh);
 
@@ -145,6 +147,21 @@ public class GroupService : IGroupService
         });
     }
 
+    /// <summary>
+    /// Envía la opción Start al servidor y gestiona la respuesta.
+    ///
+    /// BUG CORREGIDO: el servidor, después de procesar Start (tanto si
+    /// started==true como si started==false), vuelve al inicio del bucle
+    /// del lobby y envía SIEMPRE la cabecera estándar (bool, int, bool)
+    /// antes de esperar la siguiente opción del cliente.
+    ///
+    /// Si el cliente no leía esa cabecera cuando started==false,
+    /// los 6 bytes quedaban en el buffer y la siguiente llamada
+    /// del auto-refresh leía basura → desincronización permanente
+    /// del protocolo. El socket quedaba irrecuperable.
+    ///
+    /// Fix: leemos la cabecera SIEMPRE, independientemente del valor de started.
+    /// </summary>
     public async Task<bool> StartGroupAsync(string groupCode, bool isCurrentUserHost)
     {
         return await Task.Run(() =>
@@ -154,96 +171,91 @@ public class GroupService : IGroupService
 
             Socket socket = GetAuthenticatedSocket();
 
-            Console.WriteLine($"[GroupService] StartGroupAsync -> Group={groupCode}, Host={isCurrentUserHost}");
+            Console.WriteLine($"[GroupService] StartGroupAsync -> Group={groupCode}");
 
             SocketTools.sendInt(socket, LobbyOptionStart);
 
+            // 1. Resultado del Start
             bool started = SocketTools.receiveBool(socket);
 
-            if (started)
-            {
-                /*
-                 * El servidor, tras procesar Start, vuelve al inicio del bucle LobbyGroup
-                 * y envía la cabecera estándar:
-                 *
-                 * bool sessionValid
-                 * int memberCount
-                 * bool hasStarted
-                 *
-                 * La consumimos aquí para dejar el socket alineado antes de SendLocation.
-                 */
-                bool sessionValid = SocketTools.receiveBool(socket);
-                int memberCount = SocketTools.receiveInt(socket);
-                bool hasStarted = SocketTools.receiveBool(socket);
+            // 2. Cabecera estándar del lobby — SIEMPRE se consume.
+            //    El servidor la envía en cada iteración del bucle,
+            //    independientemente de si Start fue exitoso o no.
+            bool sessionValid = SocketTools.receiveBool(socket);
+            int memberCount = SocketTools.receiveInt(socket);
+            bool hasStarted = SocketTools.receiveBool(socket);
 
-                Console.WriteLine(
-                    $"[GroupService] Start OK. SessionValid={sessionValid}, Members={memberCount}, HasStarted={hasStarted}");
+            Console.WriteLine(
+                $"[GroupService] Start={started}, SessionValid={sessionValid}, " +
+                $"Members={memberCount}, HasStarted={hasStarted}");
 
-                if (!sessionValid)
-                    throw new InvalidOperationException("Sesión inválida tras iniciar el grupo.");
-            }
+            if (!sessionValid)
+                throw new InvalidOperationException("La sesión de lobby es inválida tras el Start.");
 
             return started;
         });
     }
 
+    /// <summary>
+    /// Envía la ubicación del usuario y espera el resultado del cálculo de ruta.
+    ///
+    /// CAMBIO: el polling ya no usa Thread.Sleep (que bloquea un thread del pool)
+    /// sino await Task.Delay, que libera el thread mientras espera.
+    ///
+    /// El envío inicial y cada iteración de polling se ejecutan en Task.Run
+    /// porque SocketTools es síncrono/bloqueante.
+    /// </summary>
     public async Task<MeetingResultModel?> SendLocationAndWaitResultAsync(
         string groupCode,
         double latitude,
         double longitude)
     {
-        return await Task.Run(() =>
+        // ── Envío inicial de ubicación ─────────────────────────────────────────
+        MeetingResultModel? immediateResult = await Task.Run(() =>
         {
             Socket socket = GetAuthenticatedSocket();
 
             Console.WriteLine($"[GroupService] Enviando ubicación: {latitude}, {longitude}");
 
-            /*
-             * IMPORTANTE:
-             * A partir del nuevo servidor, la respuesta de SendLocation ya no es:
-             *
-             * double lat
-             * double lon
-             * int duration
-             *
-             * Ahora es:
-             *
-             * string json
-             *
-             * Ese JSON contiene:
-             * - punto de encuentro
-             * - duración
-             * - distancia
-             * - transbordos
-             * - legs
-             */
             SocketTools.sendInt(socket, LobbyOptionSendLocation);
             SocketTools.sendDouble(socket, latitude);
             SocketTools.sendDouble(socket, longitude);
 
-            MeetingResultModel? immediateResult = ReceiveMeetingResultJson(socket);
+            return ReceiveMeetingResultJson(socket);
+        });
 
-            Console.WriteLine(
-                $"[GroupService] Respuesta inicial => Duration={immediateResult?.DurationSeconds}, HasValidRoute={immediateResult?.HasValidRoute}");
+        Console.WriteLine(
+            $"[GroupService] Respuesta inicial => Duration={immediateResult?.DurationSeconds}, " +
+            $"HasValidRoute={immediateResult?.HasValidRoute}");
 
-            if (immediateResult is not null && immediateResult.DurationSeconds != -1)
-                return NormalizeResult(immediateResult, latitude, longitude);
+        if (immediateResult is not null && immediateResult.DurationSeconds != -1)
+            return NormalizeResult(immediateResult, latitude, longitude);
 
-            /*
-             * Si el servidor devuelve DurationSeconds == -1,
-             * significa que todavía faltan ubicaciones.
-             *
-             * Entonces hacemos polling:
-             * 1. leemos cabecera estándar del lobby
-             * 2. enviamos PollResult
-             * 3. recibimos JSON
-             */
-            for (int attempt = 1; attempt <= MaxPollAttempts; attempt++)
+        // ── Polling asíncrono ──────────────────────────────────────────────────
+        // DurationSeconds == -1 significa que el servidor aún espera ubicaciones
+        // de otros miembros del grupo. Hacemos polling hasta obtener resultado.
+        return await PollForResultAsync(latitude, longitude);
+    }
+
+    /// <summary>
+    /// Bucle de polling que espera el resultado OTP del servidor.
+    /// Usa await Task.Delay para no bloquear threads del pool durante la espera.
+    /// </summary>
+    private async Task<MeetingResultModel?> PollForResultAsync(double latitude, double longitude)
+    {
+        for (int attempt = 1; attempt <= MaxPollAttempts; attempt++)
+        {
+            // ✅ No bloquea el thread del pool mientras espera.
+            await Task.Delay(PollDelayMilliseconds);
+
+            MeetingResultModel? pollResult = await Task.Run(() =>
             {
-                Thread.Sleep(PollDelayMilliseconds);
+                Socket socket = GetAuthenticatedSocket();
 
-                Console.WriteLine($"[GroupService] Poll attempt {attempt}/{MaxPollAttempts}: leyendo cabecera...");
+                Console.WriteLine(
+                    $"[GroupService] Poll attempt {attempt}/{MaxPollAttempts}: leyendo cabecera...");
 
+                // El servidor envía la cabecera antes de esperar la opción.
                 bool sessionValid = SocketTools.receiveBool(socket);
 
                 if (!sessionValid)
@@ -255,27 +267,31 @@ public class GroupService : IGroupService
                 Console.WriteLine(
                     $"[GroupService] Poll header <- Members={memberCount}, HasStarted={hasStarted}");
 
-                Console.WriteLine($"[GroupService] Poll attempt {attempt}/{MaxPollAttempts}: enviando PollResult...");
-
                 SocketTools.sendInt(socket, LobbyOptionPollResult);
 
-                MeetingResultModel? pollResult = ReceiveMeetingResultJson(socket);
+                MeetingResultModel? result = ReceiveMeetingResultJson(socket);
 
                 Console.WriteLine(
-                    $"[GroupService] Poll result => Duration={pollResult?.DurationSeconds}, HasValidRoute={pollResult?.HasValidRoute}");
+                    $"[GroupService] Poll result => Duration={result?.DurationSeconds}, " +
+                    $"HasValidRoute={result?.HasValidRoute}");
 
-                if (pollResult is null)
-                    continue;
+                return result;
+            });
 
-                if (pollResult.DurationSeconds == -1)
-                    continue;
+            if (pollResult is null)
+                continue;
 
-                return NormalizeResult(pollResult, latitude, longitude);
-            }
+            if (pollResult.DurationSeconds == -1)
+                continue;
 
-            throw new InvalidOperationException("El cálculo está tardando demasiado. Inténtalo de nuevo.");
-        });
+            return NormalizeResult(pollResult, latitude, longitude);
+        }
+
+        throw new InvalidOperationException(
+            "El cálculo está tardando demasiado. Inténtalo de nuevo.");
     }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
 
     /// <summary>
     /// Lee el JSON enviado por el servidor y lo convierte a MeetingResultModel.
@@ -299,9 +315,9 @@ public class GroupService : IGroupService
     /// <summary>
     /// Normaliza el resultado recibido:
     /// - rellena origen si no viniera informado
-    /// - transforma legs en itinerary
-    /// - crea puntos básicos de ruta
-    /// - gestiona errores funcionales
+    /// - construye RoutePoints de fallback
+    /// - convierte Legs en Itinerary
+    /// - aplica textos por defecto
     /// </summary>
     private static MeetingResultModel NormalizeResult(
         MeetingResultModel result,
@@ -311,33 +327,15 @@ public class GroupService : IGroupService
         if (result.DurationSeconds == -2)
             throw new InvalidOperationException(result.AddressText);
 
-        /*
-         * Si el servidor no informa origen por cualquier motivo,
-         * lo completamos desde la ubicación enviada por el cliente.
-         */
         if (result.OriginLatitude == 0 && result.OriginLongitude == 0)
         {
             result.OriginLatitude = originLatitude;
             result.OriginLongitude = originLongitude;
         }
 
-        /*
-         * Si no hay RoutePoints, generamos una línea básica:
-         * origen -> punto de encuentro.
-         *
-         * Más adelante puedes sustituir esto por la polyline real de OTP.
-         */
         result.RoutePoints ??= BuildFallbackRoutePoints(result);
-
-        /*
-         * Convertimos Legs en TransitItineraryModel para que MapViewModel
-         * pueda seguir usando su propiedad Itinerary.
-         */
         result.Itinerary ??= BuildItinerary(result);
 
-        /*
-         * Ajustes de texto por seguridad.
-         */
         if (string.IsNullOrWhiteSpace(result.MeetingPointName))
             result.MeetingPointName = "Punto de encuentro";
 
@@ -363,9 +361,6 @@ public class GroupService : IGroupService
         return result;
     }
 
-    /// <summary>
-    /// Construye el itinerario que consume MapViewModel.
-    /// </summary>
     private static TransitItineraryModel? BuildItinerary(MeetingResultModel result)
     {
         if (result.Legs == null || result.Legs.Count == 0)
@@ -380,10 +375,6 @@ public class GroupService : IGroupService
         };
     }
 
-    /// <summary>
-    /// Crea una ruta mínima de dos puntos:
-    /// origen del usuario -> punto de encuentro.
-    /// </summary>
     private static List<RoutePointModel> BuildFallbackRoutePoints(MeetingResultModel result)
     {
         return new List<RoutePointModel>

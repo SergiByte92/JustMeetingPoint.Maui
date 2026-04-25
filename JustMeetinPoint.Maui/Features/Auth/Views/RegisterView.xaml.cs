@@ -17,4 +17,14 @@ public partial class RegisterView : ContentPage
         InitializeComponent();
         BindingContext = viewModel;
     }
+
+    protected override bool OnBackButtonPressed()
+    {
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            await Shell.Current.GoToAsync("//login");
+        });
+
+        return true;
+    }
 }

@@ -57,7 +57,7 @@
         </Style>
 
         <Style x:Key="M3PrimaryButton" TargetType="Button">
-            <Setter Property="BackgroundColor" Value="#0B2545" />
+            <Setter Property="BackgroundColor" Value="#1A73E8" />
             <Setter Property="TextColor" Value="#FFFFFF" />
             <Setter Property="CornerRadius" Value="16" />
             <Setter Property="HeightRequest" Value="48" />
@@ -84,7 +84,7 @@
                         Text="{Binding GreetingText}"
                         FontSize="28"
                         FontAttributes="Bold"
-                        TextColor="#0B2545" />
+                        TextColor="#0B57D0" />
 
                     <Label
                         Text="{Binding SubtitleText}"
@@ -130,7 +130,7 @@
                             Grid.Row="2"
                             IsRunning="{Binding IsBusy}"
                             IsVisible="{Binding IsBusy}"
-                            Color="#0B2545"
+                            Color="#1A73E8"
                             HorizontalOptions="Center" />
 
                     </Grid>
@@ -143,7 +143,7 @@
                         Text="Para una quedada perfecta"
                         FontSize="17"
                         FontAttributes="Bold"
-                        TextColor="#0B2545" />
+                        TextColor="#0B57D0" />
 
                     <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
 
@@ -157,7 +157,7 @@
                                 <Border
                                     WidthRequest="62"
                                     HeightRequest="62"
-                                    BackgroundColor="#E8F0FE"
+                                    BackgroundColor="#D2E3FC"
                                     StrokeThickness="0"
                                     HorizontalOptions="Center"
                                     StrokeShape="RoundRectangle 31">
@@ -174,7 +174,7 @@
                                     Text="Punto justo"
                                     FontSize="12"
                                     FontAttributes="Bold"
-                                    TextColor="#0B2545"
+                                    TextColor="#202124"
                                     HorizontalTextAlignment="Center"
                                     LineBreakMode="TailTruncation" />
 
@@ -198,7 +198,7 @@
                                 <Border
                                     WidthRequest="62"
                                     HeightRequest="62"
-                                    BackgroundColor="#E8F0FE"
+                                    BackgroundColor="#D2E3FC"
                                     StrokeThickness="0"
                                     HorizontalOptions="Center"
                                     StrokeShape="RoundRectangle 31">
@@ -215,7 +215,7 @@
                                     Text="Menos vueltas"
                                     FontSize="12"
                                     FontAttributes="Bold"
-                                    TextColor="#0B2545"
+                                    TextColor="#202124"
                                     HorizontalTextAlignment="Center"
                                     LineBreakMode="TailTruncation" />
 
@@ -239,7 +239,7 @@
                                 <Border
                                     WidthRequest="62"
                                     HeightRequest="62"
-                                    BackgroundColor="#E8F0FE"
+                                    BackgroundColor="#D2E3FC"
                                     StrokeThickness="0"
                                     HorizontalOptions="Center"
                                     StrokeShape="RoundRectangle 31">
@@ -256,7 +256,7 @@
                                     Text="Grupo listo"
                                     FontSize="12"
                                     FontAttributes="Bold"
-                                    TextColor="#0B2545"
+                                    TextColor="#202124"
                                     HorizontalTextAlignment="Center"
                                     LineBreakMode="TailTruncation" />
 

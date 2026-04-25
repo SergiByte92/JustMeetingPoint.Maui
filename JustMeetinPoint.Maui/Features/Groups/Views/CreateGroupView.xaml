@@ -27,26 +27,26 @@
                     <BoxView
                         WidthRequest="36"
                         HeightRequest="2"
-                        Color="#E5E7EB"
+                        Color="#D2E3FC"
                         VerticalOptions="Center" />
 
                     <Border
                         WidthRequest="12"
                         HeightRequest="12"
-                        BackgroundColor="#E5E7EB"
+                        BackgroundColor="#D2E3FC"
                         StrokeThickness="0"
                         StrokeShape="RoundRectangle 6" />
 
                     <BoxView
                         WidthRequest="36"
                         HeightRequest="2"
-                        Color="#E5E7EB"
+                        Color="#D2E3FC"
                         VerticalOptions="Center" />
 
                     <Border
                         WidthRequest="12"
                         HeightRequest="12"
-                        BackgroundColor="#E5E7EB"
+                        BackgroundColor="#D2E3FC"
                         StrokeThickness="0"
                         StrokeShape="RoundRectangle 6" />
                 </HorizontalStackLayout>
@@ -57,7 +57,7 @@
                         Text="Configura tu quedada"
                         FontSize="28"
                         FontAttributes="Bold"
-                        TextColor="#0B2545" />
+                        TextColor="#0B57D0" />
 
                     <Label
                         Text="Define los datos básicos antes de crear el grupo."
@@ -75,7 +75,7 @@
 
                     <Border
                         BackgroundColor="#FFFFFF"
-                        Stroke="#E5E7EB"
+                        Stroke="#D2E3FC"
                         StrokeThickness="1"
                         StrokeShape="RoundRectangle 18"
                         Padding="14,4">
@@ -83,7 +83,7 @@
                         <Entry
                             Text="{Binding Name}"
                             Placeholder="Ej. Cena de equipo"
-                            PlaceholderColor="#98A2B3"
+                            PlaceholderColor="#5F6368"
                             TextColor="#202124"
                             BackgroundColor="Transparent"
                             HeightRequest="48" />
@@ -100,7 +100,7 @@
 
                     <Border
                         BackgroundColor="#FFFFFF"
-                        Stroke="#E5E7EB"
+                        Stroke="#D2E3FC"
                         StrokeThickness="1"
                         StrokeShape="RoundRectangle 18"
                         Padding="14,10">
@@ -108,7 +108,7 @@
                         <Editor
                             Text="{Binding Description}"
                             Placeholder="Añade contexto si lo necesitas"
-                            PlaceholderColor="#98A2B3"
+                            PlaceholderColor="#5F6368"
                             TextColor="#202124"
                             BackgroundColor="Transparent"
                             HeightRequest="96"
@@ -157,7 +157,7 @@
 
                                     <Border.Triggers>
                                         <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                            <Setter Property="BackgroundColor" Value="#E8F0FE" />
+                                            <Setter Property="BackgroundColor" Value="#D2E3FC" />
                                             <Setter Property="Stroke" Value="#1A73E8" />
                                         </DataTrigger>
                                     </Border.Triggers>
@@ -211,7 +211,7 @@
 
                                     <Border.Triggers>
                                         <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                            <Setter Property="BackgroundColor" Value="#E8F0FE" />
+                                            <Setter Property="BackgroundColor" Value="#D2E3FC" />
                                             <Setter Property="Stroke" Value="#1A73E8" />
                                         </DataTrigger>
 
@@ -247,7 +247,7 @@
                 Command="{Binding CreateGroupCommand}"
                 HeightRequest="52"
                 CornerRadius="16"
-                BackgroundColor="#0B2545"
+                BackgroundColor="#1A73E8"
                 TextColor="#FFFFFF"
                 FontAttributes="Bold" />
         </Border>

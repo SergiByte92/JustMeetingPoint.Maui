@@ -1,0 +1,42 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Fondo -->
+  <rect width="256" height="256" rx="40" fill="#1A73E8"></rect>
+
+  <!-- Círculo central -->
+  <circle cx="128" cy="128" r="40" fill="#8AB4F8"></circle>
+
+  <!-- Anillos -->
+  <circle cx="128" cy="128" r="55" stroke="#8AB4F8" stroke-width="2" fill="none" opacity="0.6"></circle>
+  <circle cx="128" cy="128" r="65" stroke="#8AB4F8" stroke-width="2" fill="none" opacity="0.4"></circle>
+
+  <!-- Líneas -->
+  <line x1="128" y1="128" x2="128" y2="60" stroke="#8AB4F8" stroke-width="3"></line>
+  <line x1="128" y1="128" x2="60" y2="128" stroke="#8AB4F8" stroke-width="3"></line>
+  <line x1="128" y1="128" x2="196" y2="128" stroke="#8AB4F8" stroke-width="3"></line>
+  <line x1="128" y1="128" x2="128" y2="196" stroke="#8AB4F8" stroke-width="3"></line>
+  <line x1="128" y1="128" x2="80" y2="80" stroke="#8AB4F8" stroke-width="3"></line>
+  <line x1="128" y1="128" x2="176" y2="80" stroke="#8AB4F8" stroke-width="3"></line>
+  <line x1="128" y1="128" x2="80" y2="176" stroke="#8AB4F8" stroke-width="3"></line>
+  <line x1="128" y1="128" x2="176" y2="176" stroke="#8AB4F8" stroke-width="3"></line>
+
+  <!-- Nodos -->
+  <circle cx="128" cy="60" r="8" fill="#8AB4F8"></circle>
+  <circle cx="60" cy="128" r="8" fill="#8AB4F8"></circle>
+  <circle cx="196" cy="128" r="8" fill="#8AB4F8"></circle>
+  <circle cx="128" cy="196" r="8" fill="#8AB4F8"></circle>
+  <circle cx="80" cy="80" r="8" fill="#8AB4F8"></circle>
+  <circle cx="176" cy="80" r="8" fill="#8AB4F8"></circle>
+  <circle cx="80" cy="176" r="8" fill="#8AB4F8"></circle>
+  <circle cx="176" cy="176" r="8" fill="#8AB4F8"></circle>
+
+  <!-- Pin -->
+  <path d="M128 115
+           C120 115 115 120 115 128
+           C115 138 128 150 128 150
+           C128 150 141 138 141 128
+           C141 120 136 115 128 115 Z" fill="#FFFFFF"></path>
+
+  <circle cx="128" cy="128" r="4" fill="#1A73E8"></circle>
+
+</svg>

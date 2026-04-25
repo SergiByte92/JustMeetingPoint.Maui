@@ -134,4 +134,6 @@ public class RegisterViewModel : BaseViewModel
             @"^[^@\s]+@[^@\s]+\.[^@\s]+$",
             RegexOptions.IgnoreCase);
     }
+
+
 }

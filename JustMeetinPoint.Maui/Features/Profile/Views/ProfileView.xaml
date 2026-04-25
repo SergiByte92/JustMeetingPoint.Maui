@@ -15,7 +15,7 @@
                     Text="Perfil"
                     FontSize="28"
                     FontAttributes="Bold"
-                    TextColor="#0B2545" />
+                    TextColor="#0B57D0" />
 
                 <Label
                     Text="Gestiona tu cuenta y preferencias de movilidad."
@@ -35,7 +35,7 @@
                     <Border
                         WidthRequest="64"
                         HeightRequest="64"
-                        BackgroundColor="#E8F0FE"
+                        BackgroundColor="#D2E3FC"
                         StrokeThickness="0"
                         StrokeShape="RoundRectangle 32">
 
@@ -92,14 +92,14 @@
                             TextColor="#5F6368" />
                     </VerticalStackLayout>
 
-                    <BoxView HeightRequest="1" Color="#F1F3F4" />
+                    <BoxView HeightRequest="1" Color="#E5E7EB" />
 
                     <!-- USERNAME -->
                     <Grid Padding="18,14" ColumnDefinitions="48,*" MinimumHeightRequest="56">
                         <Border
                             WidthRequest="36"
                             HeightRequest="36"
-                            BackgroundColor="#F1F3F4"
+                            BackgroundColor="#D2E3FC"
                             StrokeThickness="0"
                             StrokeShape="RoundRectangle 18"
                             VerticalOptions="Center">
@@ -118,14 +118,14 @@
                         </VerticalStackLayout>
                     </Grid>
 
-                    <BoxView HeightRequest="1" Color="#F1F3F4" Margin="66,0,0,0" />
+                    <BoxView HeightRequest="1" Color="#E5E7EB" Margin="66,0,0,0" />
 
                     <!-- EMAIL -->
                     <Grid Padding="18,14" ColumnDefinitions="48,*" MinimumHeightRequest="56">
                         <Border
                             WidthRequest="36"
                             HeightRequest="36"
-                            BackgroundColor="#F1F3F4"
+                            BackgroundColor="#D2E3FC"
                             StrokeThickness="0"
                             StrokeShape="RoundRectangle 18"
                             VerticalOptions="Center">
@@ -144,14 +144,14 @@
                         </VerticalStackLayout>
                     </Grid>
 
-                    <BoxView HeightRequest="1" Color="#F1F3F4" Margin="66,0,0,0" />
+                    <BoxView HeightRequest="1" Color="#E5E7EB" Margin="66,0,0,0" />
 
                     <!-- FECHA NACIMIENTO -->
                     <Grid Padding="18,14" ColumnDefinitions="48,*" MinimumHeightRequest="56">
                         <Border
                             WidthRequest="36"
                             HeightRequest="36"
-                            BackgroundColor="#F1F3F4"
+                            BackgroundColor="#D2E3FC"
                             StrokeThickness="0"
                             StrokeShape="RoundRectangle 18"
                             VerticalOptions="Center">
@@ -195,7 +195,7 @@
                             TextColor="#5F6368" />
                     </VerticalStackLayout>
 
-                    <BoxView HeightRequest="1" Color="#F1F3F4" />
+                    <BoxView HeightRequest="1" Color="#E5E7EB" />
 
                     <Grid Padding="18,14" ColumnDefinitions="48,*,Auto" MinimumHeightRequest="56">
                         <Image
@@ -217,7 +217,7 @@
                             VerticalOptions="Center" />
                     </Grid>
 
-                    <BoxView HeightRequest="1" Color="#F1F3F4" Margin="66,0,0,0" />
+                    <BoxView HeightRequest="1" Color="#E5E7EB" Margin="66,0,0,0" />
 
                     <Grid Padding="18,14" ColumnDefinitions="48,*,Auto" MinimumHeightRequest="56">
                         <Image
@@ -235,7 +235,7 @@
                             Grid.Column="2"
                             Text="Próximamente"
                             FontSize="12"
-                            TextColor="#98A2B3"
+                            TextColor="#5F6368"
                             VerticalOptions="Center" />
                     </Grid>
                 </VerticalStackLayout>
@@ -265,29 +265,27 @@
 
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                         <Border
-                            BackgroundColor="#F8F9FA"
-                            Stroke="#E5E7EB"
-                            StrokeThickness="1"
+                            BackgroundColor="#D2E3FC"
+                            StrokeThickness="0"
                             StrokeShape="RoundRectangle 16"
                             Padding="14">
 
                             <VerticalStackLayout Spacing="4">
                                 <Label Text="Grupos" FontSize="12" TextColor="#5F6368" />
-                                <Label Text="{Binding MeetingsCreated}" FontSize="20" FontAttributes="Bold" TextColor="#202124" />
+                                <Label Text="{Binding MeetingsCreated}" FontSize="20" FontAttributes="Bold" TextColor="#0B57D0" />
                             </VerticalStackLayout>
                         </Border>
 
                         <Border
                             Grid.Column="1"
-                            BackgroundColor="#F8F9FA"
-                            Stroke="#E5E7EB"
-                            StrokeThickness="1"
+                            BackgroundColor="#D2E3FC"
+                            StrokeThickness="0"
                             StrokeShape="RoundRectangle 16"
                             Padding="14">
 
                             <VerticalStackLayout Spacing="4">
                                 <Label Text="Tiempo medio" FontSize="12" TextColor="#5F6368" />
-                                <Label Text="{Binding AvgTravelTimeText}" FontSize="20" FontAttributes="Bold" TextColor="#202124" />
+                                <Label Text="{Binding AvgTravelTimeText}" FontSize="20" FontAttributes="Bold" TextColor="#0B57D0" />
                             </VerticalStackLayout>
                         </Border>
                     </Grid>
@@ -302,39 +300,38 @@
                 IsVisible="{Binding HasError}"
                 Margin="4,0,4,0" />
 
-
             <!-- LOGOUT -->
             <Border
-            BackgroundColor="#FFFFFF"
-            Stroke="#FAD2CF"
-            StrokeThickness="1"
-            StrokeShape="RoundRectangle 24"
-            Padding="0"
-            MinimumHeightRequest="56">
+                BackgroundColor="#FFFFFF"
+                Stroke="#FAD2CF"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 24"
+                Padding="0"
+                MinimumHeightRequest="56">
 
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding LogoutCommand}" />
                 </Border.GestureRecognizers>
 
                 <Grid
-                Padding="18,16"
-                ColumnDefinitions="48,*"
-                MinimumHeightRequest="56">
+                    Padding="18,16"
+                    ColumnDefinitions="48,*"
+                    MinimumHeightRequest="56">
 
                     <Image
-                    Source="logout_icon.svg"
-                    WidthRequest="24"
-                    HeightRequest="24"
-                    VerticalOptions="Center"
-                    HorizontalOptions="Start" />
+                        Source="logout_icon.svg"
+                        WidthRequest="24"
+                        HeightRequest="24"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Start" />
 
                     <Label
-                    Grid.Column="1"
-                    Text="Cerrar sesión"
-                    FontSize="14"
-                    FontAttributes="Bold"
-                    TextColor="#D93025"
-                    VerticalOptions="Center" />
+                        Grid.Column="1"
+                        Text="Cerrar sesión"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        TextColor="#D93025"
+                        VerticalOptions="Center" />
                 </Grid>
             </Border>
 

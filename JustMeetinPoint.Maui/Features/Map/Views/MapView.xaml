@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     x:Class="JustMeetinPoint.Maui.Features.Map.Views.MapView"
     Title="Mapa"
-    BackgroundColor="#0B2545">
+    BackgroundColor="#0B57D0">
 
     <Grid RowDefinitions="*">
 
@@ -18,8 +18,9 @@
             ColumnDefinitions="*,Auto">
 
             <Border
-                BackgroundColor="#CC0B2545"
-                StrokeThickness="0"
+                BackgroundColor="#EFFFFFFF"
+                Stroke="#D2E3FC"
+                StrokeThickness="1"
                 StrokeShape="RoundRectangle 16"
                 Padding="14,10">
 
@@ -27,14 +28,14 @@
                     Text="{Binding MeetingPointName}"
                     FontSize="16"
                     FontAttributes="Bold"
-                    TextColor="#FFFFFF"
+                    TextColor="#202124"
                     LineBreakMode="TailTruncation" />
             </Border>
 
             <Border
                 Grid.Column="1"
                 Margin="12,0,0,0"
-                BackgroundColor="#CC0B2545"
+                BackgroundColor="#1A73E8"
                 StrokeThickness="0"
                 StrokeShape="RoundRectangle 16"
                 Padding="12,10">
@@ -43,7 +44,7 @@
                     Text="{Binding DurationText}"
                     FontSize="14"
                     FontAttributes="Bold"
-                    TextColor="#D94FA8" />
+                    TextColor="#FFFFFF" />
             </Border>
         </Grid>
 
@@ -51,7 +52,7 @@
         <Border
             x:Name="BottomSheet"
             VerticalOptions="End"
-            BackgroundColor="#F8FAFC"
+            BackgroundColor="#F3F4F6"
             StrokeThickness="0"
             StrokeShape="RoundRectangle 24,24,0,0"
             Padding="18,12,18,22"
@@ -70,7 +71,7 @@
                         HorizontalOptions="Center"
                         WidthRequest="52"
                         HeightRequest="6"
-                        BackgroundColor="#CBD5E1"
+                        BackgroundColor="#D2E3FC"
                         StrokeThickness="0"
                         StrokeShape="RoundRectangle 999" />
                 </Grid>
@@ -81,18 +82,18 @@
                         Text="{Binding MeetingPointName}"
                         FontSize="20"
                         FontAttributes="Bold"
-                        TextColor="#0B2545" />
+                        TextColor="#0B57D0" />
 
                     <Label
                         Text="{Binding SummaryText}"
                         FontSize="14"
-                        TextColor="#475569" />
+                        TextColor="#5F6368" />
 
                     <Label
                         Text="{Binding TransfersText}"
                         FontSize="13"
                         FontAttributes="Bold"
-                        TextColor="#D94FA8" />
+                        TextColor="#1A73E8" />
                 </VerticalStackLayout>
 
                 <!-- MÉTRICAS -->
@@ -104,7 +105,7 @@
 
                     <Border
                         Grid.Column="0"
-                        BackgroundColor="#EEF2FF"
+                        BackgroundColor="#D2E3FC"
                         StrokeThickness="0"
                         StrokeShape="RoundRectangle 16"
                         Padding="14">
@@ -113,19 +114,19 @@
                             <Label
                                 Text="Tiempo estimado"
                                 FontSize="12"
-                                TextColor="#64748B" />
+                                TextColor="#5F6368" />
 
                             <Label
                                 Text="{Binding DurationText}"
                                 FontSize="18"
                                 FontAttributes="Bold"
-                                TextColor="#0B2545" />
+                                TextColor="#0B57D0" />
                         </VerticalStackLayout>
                     </Border>
 
                     <Border
                         Grid.Column="1"
-                        BackgroundColor="#EEF2FF"
+                        BackgroundColor="#D2E3FC"
                         StrokeThickness="0"
                         StrokeShape="RoundRectangle 16"
                         Padding="14">
@@ -134,13 +135,13 @@
                             <Label
                                 Text="Distancia"
                                 FontSize="12"
-                                TextColor="#64748B" />
+                                TextColor="#5F6368" />
 
                             <Label
                                 Text="{Binding DistanceText}"
                                 FontSize="18"
                                 FontAttributes="Bold"
-                                TextColor="#0B2545" />
+                                TextColor="#0B57D0" />
                         </VerticalStackLayout>
                     </Border>
                 </Grid>
@@ -156,8 +157,9 @@
 
                         <!-- INFO GENERAL -->
                         <Border
-                            BackgroundColor="#F1F5F9"
-                            StrokeThickness="0"
+                            BackgroundColor="#FFFFFF"
+                            Stroke="#E5E7EB"
+                            StrokeThickness="1"
                             StrokeShape="RoundRectangle 18"
                             Padding="14">
 
@@ -167,26 +169,26 @@
                                     <Label
                                         Text="Estado de ruta"
                                         FontSize="12"
-                                        TextColor="#64748B" />
+                                        TextColor="#5F6368" />
 
                                     <Label
                                         Text="{Binding AddressText}"
                                         FontSize="15"
                                         FontAttributes="Bold"
-                                        TextColor="#0B2545" />
+                                        TextColor="#202124" />
                                 </VerticalStackLayout>
 
                                 <VerticalStackLayout Spacing="2">
                                     <Label
                                         Text="Equilibrio grupal"
                                         FontSize="12"
-                                        TextColor="#64748B" />
+                                        TextColor="#5F6368" />
 
                                     <Label
                                         Text="{Binding FairnessText}"
                                         FontSize="15"
                                         FontAttributes="Bold"
-                                        TextColor="#0B2545" />
+                                        TextColor="#202124" />
                                 </VerticalStackLayout>
 
                             </VerticalStackLayout>
@@ -199,31 +201,14 @@
                                 Text="Itinerario"
                                 FontSize="16"
                                 FontAttributes="Bold"
-                                TextColor="#0B2545" />
+                                TextColor="#0B57D0" />
 
-                            <!--
-                                Antes usabas InvertedBoolConverter.
-                                Como no está declarado en App.xaml, podía romper la carga de la vista.
-                                Ahora usamos una propiedad segura del ViewModel: ShowNoItineraryMessage.
-                            -->
                             <Label
                                 Text="No hay detalle de itinerario disponible."
                                 FontSize="13"
-                                TextColor="#64748B"
+                                TextColor="#5F6368"
                                 IsVisible="{Binding ShowNoItineraryMessage}" />
 
-                            <!--
-                                Antes:
-                                    ItemsSource="{Binding Itinerary.Legs}"
-
-                                Problema:
-                                    Itinerary puede ser null al construir la vista.
-
-                                Ahora:
-                                    ItemsSource="{Binding Legs}"
-
-                                Legs siempre devuelve una lista, aunque esté vacía.
-                            -->
                             <CollectionView
                                 ItemsSource="{Binding Legs}"
                                 IsVisible="{Binding HasItinerary}"
@@ -235,7 +220,7 @@
                                         <Border
                                             Margin="0,0,0,10"
                                             BackgroundColor="#FFFFFF"
-                                            Stroke="#E2E8F0"
+                                            Stroke="#E5E7EB"
                                             StrokeThickness="1"
                                             StrokeShape="RoundRectangle 16"
                                             Padding="14">
@@ -246,7 +231,7 @@
                                                 <Border
                                                     WidthRequest="42"
                                                     HeightRequest="42"
-                                                    BackgroundColor="#EEF2FF"
+                                                    BackgroundColor="#D2E3FC"
                                                     StrokeThickness="0"
                                                     StrokeShape="RoundRectangle 21"
                                                     VerticalOptions="Start">
@@ -255,7 +240,7 @@
                                                         Text="{Binding Mode}"
                                                         FontSize="10"
                                                         FontAttributes="Bold"
-                                                        TextColor="#1F5FBF"
+                                                        TextColor="#0B57D0"
                                                         HorizontalOptions="Center"
                                                         VerticalOptions="Center"
                                                         HorizontalTextAlignment="Center" />
@@ -268,23 +253,23 @@
                                                         Text="{Binding DisplayTitle}"
                                                         FontSize="15"
                                                         FontAttributes="Bold"
-                                                        TextColor="#0B2545" />
+                                                        TextColor="#202124" />
 
                                                     <Label
                                                         Text="{Binding DisplaySubtitle}"
                                                         FontSize="13"
-                                                        TextColor="#475569" />
+                                                        TextColor="#5F6368" />
 
                                                     <Label
                                                         Text="{Binding FromName}"
                                                         FontSize="12"
-                                                        TextColor="#64748B"
+                                                        TextColor="#5F6368"
                                                         LineBreakMode="TailTruncation" />
 
                                                     <Label
                                                         Text="{Binding ToName}"
                                                         FontSize="12"
-                                                        TextColor="#64748B"
+                                                        TextColor="#5F6368"
                                                         LineBreakMode="TailTruncation" />
 
                                                     <Grid
@@ -296,14 +281,14 @@
                                                             Text="{Binding DurationText}"
                                                             FontSize="12"
                                                             FontAttributes="Bold"
-                                                            TextColor="#D94FA8" />
+                                                            TextColor="#1A73E8" />
 
                                                         <Label
                                                             Grid.Column="1"
                                                             Text="{Binding DistanceText}"
                                                             FontSize="12"
                                                             FontAttributes="Bold"
-                                                            TextColor="#475569" />
+                                                            TextColor="#5F6368" />
                                                     </Grid>
                                                 </VerticalStackLayout>
                                             </Grid>

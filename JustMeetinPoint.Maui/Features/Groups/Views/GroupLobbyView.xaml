@@ -60,7 +60,7 @@
                     Text="{Binding LobbyTitle}"
                     FontSize="28"
                     FontAttributes="Bold"
-                    TextColor="#0B2545" />
+                    TextColor="#0B57D0" />
 
                 <Label
                     Text="{Binding RoleText}"
@@ -84,7 +84,7 @@
                         TextColor="#202124" />
 
                     <Border
-                        BackgroundColor="#E8F0FE"
+                        BackgroundColor="#D2E3FC"
                         StrokeThickness="0"
                         StrokeShape="RoundRectangle 16"
                         Padding="14">
@@ -180,7 +180,7 @@
                     <ProgressBar
                         Progress="{Binding ProgressValue}"
                         HeightRequest="8"
-                        BackgroundColor="#E5E7EB"
+                        BackgroundColor="#D2E3FC"
                         ProgressColor="#1A73E8" />
 
                     <ActivityIndicator
@@ -220,7 +220,7 @@
                 Text="Iniciar grupo"
                 Command="{Binding StartCommand}"
                 IsVisible="{Binding CanStartGroup}"
-                BackgroundColor="#0B2545"
+                BackgroundColor="#1A73E8"
                 TextColor="#FFFFFF"
                 FontAttributes="Bold"
                 CornerRadius="16"

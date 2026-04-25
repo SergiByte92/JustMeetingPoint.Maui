@@ -15,22 +15,22 @@
             <!-- BRAND HEADER -->
             <VerticalStackLayout
                 Grid.Row="0"
-                Margin="0,36,0,24"
-                VerticalOptions="Center"
+                Margin="0,32,0,24"
                 HorizontalOptions="Center"
                 Spacing="14">
 
                 <Image
-                    Source="app_logo.svg"
-                    WidthRequest="92"
-                    HeightRequest="92"
-                    Aspect="AspectFit" />
+                    Source="app_logo.png"
+                    WidthRequest="96"
+                    HeightRequest="96"
+                    Aspect="AspectFit"
+                    HorizontalOptions="Center" />
 
                 <Label
                     Text="Just Meeting Point"
                     FontSize="30"
                     FontAttributes="Bold"
-                    TextColor="#0B2545"
+                    TextColor="#0B57D0"
                     HorizontalTextAlignment="Center" />
 
                 <Label
@@ -67,8 +67,8 @@
                     <!-- USERNAME -->
                     <Border
                         Margin="0,8,0,0"
-                        BackgroundColor="#F8F9FA"
-                        Stroke="#E5E7EB"
+                        BackgroundColor="#FFFFFF"
+                        Stroke="#D2E3FC"
                         StrokeThickness="1"
                         StrokeShape="RoundRectangle 18"
                         Padding="14,4">
@@ -77,15 +77,15 @@
                             Placeholder="Nombre"
                             Text="{Binding Username}"
                             TextColor="#202124"
-                            PlaceholderColor="#98A2B3"
+                            PlaceholderColor="#5F6368"
                             BackgroundColor="Transparent"
                             HeightRequest="48" />
                     </Border>
 
                     <!-- EMAIL -->
                     <Border
-                        BackgroundColor="#F8F9FA"
-                        Stroke="#E5E7EB"
+                        BackgroundColor="#FFFFFF"
+                        Stroke="#D2E3FC"
                         StrokeThickness="1"
                         StrokeShape="RoundRectangle 18"
                         Padding="14,4">
@@ -95,15 +95,15 @@
                             Text="{Binding Email}"
                             Keyboard="Email"
                             TextColor="#202124"
-                            PlaceholderColor="#98A2B3"
+                            PlaceholderColor="#5F6368"
                             BackgroundColor="Transparent"
                             HeightRequest="48" />
                     </Border>
 
                     <!-- BIRTH DATE -->
                     <Border
-                        BackgroundColor="#F8F9FA"
-                        Stroke="#E5E7EB"
+                        BackgroundColor="#FFFFFF"
+                        Stroke="#D2E3FC"
                         StrokeThickness="1"
                         StrokeShape="RoundRectangle 18"
                         Padding="14,4">
@@ -119,8 +119,8 @@
 
                     <!-- PASSWORD -->
                     <Border
-                        BackgroundColor="#F8F9FA"
-                        Stroke="#E5E7EB"
+                        BackgroundColor="#FFFFFF"
+                        Stroke="#D2E3FC"
                         StrokeThickness="1"
                         StrokeShape="RoundRectangle 18"
                         Padding="14,4">
@@ -130,15 +130,15 @@
                             Text="{Binding Password}"
                             IsPassword="True"
                             TextColor="#202124"
-                            PlaceholderColor="#98A2B3"
+                            PlaceholderColor="#5F6368"
                             BackgroundColor="Transparent"
                             HeightRequest="48" />
                     </Border>
 
                     <!-- REPEAT PASSWORD -->
                     <Border
-                        BackgroundColor="#F8F9FA"
-                        Stroke="#E5E7EB"
+                        BackgroundColor="#FFFFFF"
+                        Stroke="#D2E3FC"
                         StrokeThickness="1"
                         StrokeShape="RoundRectangle 18"
                         Padding="14,4">
@@ -148,7 +148,7 @@
                             Text="{Binding RepeatPassword}"
                             IsPassword="True"
                             TextColor="#202124"
-                            PlaceholderColor="#98A2B3"
+                            PlaceholderColor="#5F6368"
                             BackgroundColor="Transparent"
                             HeightRequest="48" />
                     </Border>
@@ -166,7 +166,7 @@
                         Margin="0,8,0,0"
                         Command="{Binding RegisterCommand}"
                         HeightRequest="52"
-                        BackgroundColor="#0B2545"
+                        BackgroundColor="#1A73E8"
                         TextColor="#FFFFFF"
                         FontAttributes="Bold"
                         CornerRadius="16" />

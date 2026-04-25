@@ -8,18 +8,23 @@
     xmlns:groupViews="clr-namespace:JustMeetinPoint.Maui.Features.Groups.Views"
     xmlns:mapViews="clr-namespace:JustMeetinPoint.Maui.Features.Map.Views"
     xmlns:profileViews="clr-namespace:JustMeetinPoint.Maui.Features.Profile.Views"
+
     Shell.FlyoutBehavior="Disabled"
+
     Shell.BackgroundColor="#FFFFFF"
     Shell.ForegroundColor="#202124"
     Shell.TitleColor="#202124"
     Shell.DisabledColor="#DADCE0"
     Shell.UnselectedColor="#5F6368"
+
     Shell.TabBarBackgroundColor="#FFFFFF"
     Shell.TabBarForegroundColor="#1A73E8"
     Shell.TabBarTitleColor="#1A73E8"
     Shell.TabBarUnselectedColor="#5F6368"
+
     Shell.NavBarHasShadow="False">
 
+    <!-- AUTH -->
     <ShellContent
         Title="Login"
         ContentTemplate="{DataTemplate authViews:LoginView}"
@@ -34,6 +39,7 @@
         Shell.TabBarIsVisible="False"
         Shell.NavBarIsVisible="False" />
 
+    <!-- MAIN APP -->
     <TabBar Route="main">
 
         <ShellContent

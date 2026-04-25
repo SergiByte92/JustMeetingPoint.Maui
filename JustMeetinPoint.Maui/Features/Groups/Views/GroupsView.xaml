@@ -15,7 +15,7 @@
                     Text="Organiza tu quedada"
                     FontSize="28"
                     FontAttributes="Bold"
-                    TextColor="#0B2545" />
+                    TextColor="#0B57D0" />
 
                 <Label
                     Text="Crea un grupo o accede con un código."
@@ -50,7 +50,7 @@
                         Text="Crear grupo"
                         HeightRequest="48"
                         CornerRadius="16"
-                        BackgroundColor="#0B2545"
+                        BackgroundColor="#1A73E8"
                         TextColor="#FFFFFF"
                         FontAttributes="Bold"
                         Command="{Binding CreateGroupCommand}" />
@@ -60,7 +60,10 @@
 
             <!-- SEPARADOR -->
             <Grid ColumnDefinitions="*,Auto,*" VerticalOptions="Center">
-                <BoxView HeightRequest="1" Color="#E5E7EB" VerticalOptions="Center" />
+                <BoxView
+                    HeightRequest="1"
+                    Color="#E5E7EB"
+                    VerticalOptions="Center" />
 
                 <Label
                     Grid.Column="1"
@@ -69,7 +72,11 @@
                     TextColor="#5F6368"
                     Margin="10,0" />
 
-                <BoxView Grid.Column="2" HeightRequest="1" Color="#E5E7EB" VerticalOptions="Center" />
+                <BoxView
+                    Grid.Column="2"
+                    HeightRequest="1"
+                    Color="#E5E7EB"
+                    VerticalOptions="Center" />
             </Grid>
 
             <!-- JOIN CARD -->
@@ -96,8 +103,8 @@
                     </VerticalStackLayout>
 
                     <Border
-                        BackgroundColor="#F8F9FA"
-                        Stroke="#E5E7EB"
+                        BackgroundColor="#FFFFFF"
+                        Stroke="#D2E3FC"
                         StrokeThickness="1"
                         StrokeShape="RoundRectangle 16"
                         Padding="14,4">
@@ -105,7 +112,7 @@
                         <Entry
                             Text="{Binding JoinCode}"
                             Placeholder="CÓDIGO"
-                            PlaceholderColor="#98A2B3"
+                            PlaceholderColor="#5F6368"
                             TextColor="#202124"
                             BackgroundColor="Transparent"
                             HeightRequest="48"
@@ -119,7 +126,7 @@
                         Text="Unirme"
                         HeightRequest="48"
                         CornerRadius="16"
-                        BackgroundColor="#E8F0FE"
+                        BackgroundColor="#D2E3FC"
                         TextColor="#1A73E8"
                         FontAttributes="Bold"
                         Command="{Binding JoinGroupCommand}" />

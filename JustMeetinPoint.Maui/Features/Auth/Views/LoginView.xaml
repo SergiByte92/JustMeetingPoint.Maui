@@ -15,22 +15,22 @@
             <!-- BRAND HEADER -->
             <VerticalStackLayout
                 Grid.Row="0"
-                Margin="0,48,0,28"
-                VerticalOptions="Center"
+                Margin="0,46,0,28"
                 HorizontalOptions="Center"
                 Spacing="14">
 
                 <Image
-                    Source="app_logo.svg"
-                    WidthRequest="96"
-                    HeightRequest="96"
-                    Aspect="AspectFit" />
+                    Source="app_logo.png"
+                    WidthRequest="108"
+                    HeightRequest="108"
+                    Aspect="AspectFit"
+                    HorizontalOptions="Center" />
 
                 <Label
                     Text="Just Meeting Point"
                     FontSize="30"
                     FontAttributes="Bold"
-                    TextColor="#0B2545"
+                    TextColor="#0B57D0"
                     HorizontalTextAlignment="Center" />
 
                 <Label
@@ -67,8 +67,8 @@
                     <!-- EMAIL -->
                     <Border
                         Margin="0,8,0,0"
-                        BackgroundColor="#F8F9FA"
-                        Stroke="#E5E7EB"
+                        BackgroundColor="#FFFFFF"
+                        Stroke="#D2E3FC"
                         StrokeThickness="1"
                         StrokeShape="RoundRectangle 18"
                         Padding="14,4">
@@ -78,15 +78,15 @@
                             Text="{Binding Email}"
                             Keyboard="Email"
                             TextColor="#202124"
-                            PlaceholderColor="#98A2B3"
+                            PlaceholderColor="#5F6368"
                             BackgroundColor="Transparent"
                             HeightRequest="48" />
                     </Border>
 
                     <!-- PASSWORD -->
                     <Border
-                        BackgroundColor="#F8F9FA"
-                        Stroke="#E5E7EB"
+                        BackgroundColor="#FFFFFF"
+                        Stroke="#D2E3FC"
                         StrokeThickness="1"
                         StrokeShape="RoundRectangle 18"
                         Padding="14,4">
@@ -96,7 +96,7 @@
                             Text="{Binding Password}"
                             IsPassword="True"
                             TextColor="#202124"
-                            PlaceholderColor="#98A2B3"
+                            PlaceholderColor="#5F6368"
                             BackgroundColor="Transparent"
                             HeightRequest="48" />
                     </Border>
@@ -113,7 +113,7 @@
                         Text="Iniciar sesión"
                         Margin="0,8,0,0"
                         HeightRequest="52"
-                        BackgroundColor="#0B2545"
+                        BackgroundColor="#1A73E8"
                         TextColor="#FFFFFF"
                         FontAttributes="Bold"
                         CornerRadius="16"
@@ -125,7 +125,7 @@
                         HeightRequest="52"
                         BackgroundColor="#FFFFFF"
                         TextColor="#1A73E8"
-                        BorderColor="#E5E7EB"
+                        BorderColor="#D2E3FC"
                         BorderWidth="1"
                         FontAttributes="Bold"
                         CornerRadius="16"

@@ -10,7 +10,6 @@
     <ScrollView>
         <VerticalStackLayout Padding="20,22,20,32" Spacing="18">
 
-            <!-- STEPPER -->
             <Grid
                 ColumnDefinitions="*,Auto,*,Auto,*"
                 VerticalOptions="Center"
@@ -54,7 +53,6 @@
                     VerticalOptions="Center" />
             </Grid>
 
-            <!-- HEADER -->
             <VerticalStackLayout Spacing="4">
                 <Label
                     Text="{Binding LobbyTitle}"
@@ -68,7 +66,6 @@
                     TextColor="#5F6368" />
             </VerticalStackLayout>
 
-            <!-- CÓDIGO -->
             <Border
                 Padding="18"
                 BackgroundColor="#FFFFFF"
@@ -99,7 +96,6 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- RESUMEN -->
             <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
 
                 <Border
@@ -148,7 +144,6 @@
 
             </Grid>
 
-            <!-- ESTADO -->
             <Border
                 Padding="18"
                 BackgroundColor="#FFFFFF"
@@ -183,16 +178,20 @@
                         BackgroundColor="#D2E3FC"
                         ProgressColor="#1A73E8" />
 
-                    <ActivityIndicator
-                        IsVisible="{Binding IsCalculating}"
-                        IsRunning="{Binding IsCalculating}"
-                        Color="#1A73E8"
-                        HorizontalOptions="Center" />
+                    <!--
+                        Se elimina ActivityIndicator.
+                        Ya existe feedback suficiente con:
+                        - CurrentStatus
+                        - CurrentSubStatus
+                        - ProgressBar
+
+                        Esto reduce ruido visual y evita que el usuario perciba
+                        un spinner infinito cuando el sistema está esperando OTP/polling.
+                    -->
 
                 </VerticalStackLayout>
             </Border>
 
-            <!-- ERROR -->
             <Border
                 Padding="16"
                 BackgroundColor="#FFF7F7"
@@ -215,7 +214,6 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- BOTONES -->
             <Button
                 Text="Iniciar grupo"
                 Command="{Binding StartCommand}"

@@ -15,7 +15,14 @@ public partial class GroupLobbyViewModel : ObservableObject
     private readonly IMeetingStateService _meetingStateService;
 
     private CancellationTokenSource? _autoRefreshCts;
+
+    /// <summary>
+    /// Indica que este cliente ya entró en el flujo final:
+    /// obtener ubicación → enviarla → esperar resultado → navegar.
+    /// Evita doble envío de ubicación.
+    /// </summary>
     private bool _hasSentLocation;
+
     private bool _isAutoRefreshRunning;
 
     public GroupLobbyViewModel(
@@ -35,13 +42,8 @@ public partial class GroupLobbyViewModel : ObservableObject
     [ObservableProperty] private bool isBusy;
     [ObservableProperty] private string errorMessage = string.Empty;
 
-    // Estado principal visible en la UI
     [ObservableProperty] private string currentStatus = "Esperando participantes...";
-
-    // Subestado / descripción más detallada
     [ObservableProperty] private string currentSubStatus = "Comparte el código del grupo para que se unan más personas.";
-
-    // Valor de la barra de progreso (0 a 1)
     [ObservableProperty] private double progressValue = 0.35;
 
     #endregion
@@ -80,12 +82,6 @@ public partial class GroupLobbyViewModel : ObservableObject
     public string RoleText =>
         IsCurrentUserHost ? "Eres el host del grupo" : "Te has unido como participante";
 
-    /// <summary>
-    /// Paso actual del stepper visual superior.
-    /// 1 = grupo creado
-    /// 2 = esperando / listo para iniciar
-    /// 3 = cálculo en curso
-    /// </summary>
     public int CurrentStep => HasStarted ? 3 : 2;
 
     public string Step1Color => CurrentStep >= 1 ? "#1F5FBF" : "#D9DEE5";
@@ -100,10 +96,8 @@ public partial class GroupLobbyViewModel : ObservableObject
     {
         if (!string.IsNullOrWhiteSpace(value))
         {
-            // Al entrar, colocamos un estado coherente de espera
             UpdateWaitingState();
 
-            // Hacemos la carga inicial del lobby
             MainThread.BeginInvokeOnMainThread(async () => await LoadLobbyAsync());
         }
     }
@@ -112,12 +106,8 @@ public partial class GroupLobbyViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(ParticipantsText));
 
-        // Mientras el grupo no haya empezado,
-        // queremos que el texto y progreso reflejen el número real de miembros.
         if (!HasStarted)
-        {
             UpdateWaitingState();
-        }
     }
 
     partial void OnHasStartedChanged(bool value)
@@ -131,14 +121,9 @@ public partial class GroupLobbyViewModel : ObservableObject
         OnPropertyChanged(nameof(Step3Color));
 
         if (value)
-        {
-            // Cuando el grupo arranca, cambiamos a estado de cálculo
             UpdateCalculatingState("El grupo se ha iniciado. Preparando ubicación...", 0.45);
-        }
         else
-        {
             UpdateWaitingState();
-        }
     }
 
     partial void OnErrorMessageChanged(string value)
@@ -191,8 +176,6 @@ public partial class GroupLobbyViewModel : ObservableObject
         {
             while (!ct.IsCancellationRequested)
             {
-                // Solo refrescamos mientras no se haya entrado
-                // en la fase final de envío de ubicación/cálculo.
                 if (!string.IsNullOrWhiteSpace(GroupCode) && !_hasSentLocation)
                 {
                     await LoadLobbyAsync();
@@ -203,7 +186,6 @@ public partial class GroupLobbyViewModel : ObservableObject
         }
         catch (OperationCanceledException)
         {
-            // Cancelación normal, no hay que hacer nada.
         }
         catch (Exception ex)
         {
@@ -222,7 +204,6 @@ public partial class GroupLobbyViewModel : ObservableObject
     [RelayCommand]
     private async Task LoadLobbyAsync()
     {
-        // Protegemos la entrada para no solapar llamadas
         if (IsBusy || _hasSentLocation || string.IsNullOrWhiteSpace(GroupCode))
             return;
 
@@ -238,17 +219,16 @@ public partial class GroupLobbyViewModel : ObservableObject
             MemberCount = lobby.MemberCount;
             HasStarted = lobby.HasStarted;
 
-            Debug.WriteLine($"[LobbyVM] Refresh result -> Members={MemberCount}, Started={HasStarted}, HasSentLocation={_hasSentLocation}");
+            Debug.WriteLine(
+                $"[LobbyVM] Refresh result -> Members={MemberCount}, Started={HasStarted}, " +
+                $"HasSentLocation={_hasSentLocation}");
 
-            // Si todavía no ha empezado, solo actualizamos la UI de espera y salimos.
             if (!HasStarted)
             {
                 UpdateWaitingState();
                 return;
             }
 
-            // Si el grupo ya empezó y todavía no hemos enviado ubicación,
-            // paramos el auto refresh y entramos al flujo final.
             if (!_hasSentLocation)
             {
                 _hasSentLocation = true;
@@ -256,9 +236,6 @@ public partial class GroupLobbyViewModel : ObservableObject
 
                 UpdateCalculatingState("Obteniendo tu ubicación actual...", 0.45);
 
-                // IMPORTANTE:
-                // NO usamos Task.Run aquí.
-                // Dejamos el flujo lineal y determinista.
                 await SendCurrentLocationAndNavigateToMapAsync();
             }
         }
@@ -302,7 +279,6 @@ public partial class GroupLobbyViewModel : ObservableObject
 
             UpdateCalculatingState("Obteniendo tu ubicación actual...", 0.45);
 
-            // Igual que antes: sin Task.Run
             await SendCurrentLocationAndNavigateToMapAsync();
         }
         catch (Exception ex)
@@ -351,27 +327,25 @@ public partial class GroupLobbyViewModel : ObservableObject
             var permission = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
 
             if (permission != PermissionStatus.Granted)
-            {
                 permission = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
-            }
 
             if (permission != PermissionStatus.Granted)
-            {
                 throw new InvalidOperationException("Permiso de ubicación denegado.");
-            }
 
             Debug.WriteLine("[LobbyVM] 2. Obteniendo ubicación");
             UpdateCalculatingState("Obteniendo tu posición actual...", 0.60);
 
+            /*
+             * En emulador, High puede depender de GNSS simulado y tardar demasiado.
+             * Medium suele ser suficiente para pruebas y evita bloqueos aparentes.
+             */
             Location? location = await Geolocation.Default.GetLocationAsync(
                 new GeolocationRequest(
-                    GeolocationAccuracy.High,
-                    TimeSpan.FromSeconds(10)));
+                    GeolocationAccuracy.Medium,
+                    TimeSpan.FromSeconds(5)));
 
             if (location is null)
-            {
                 throw new InvalidOperationException("No se pudo obtener la ubicación actual.");
-            }
 
             Debug.WriteLine(
                 $"[LobbyVM] 3. Ubicación obtenida: Lat={location.Latitude}, Lon={location.Longitude}");
@@ -391,9 +365,7 @@ public partial class GroupLobbyViewModel : ObservableObject
                   $"Duration={result.DurationSeconds}, Valid={result.HasValidRoute}, Legs={result.Legs?.Count ?? 0}");
 
             if (result is null)
-            {
                 throw new InvalidOperationException("No se recibió resultado del servidor.");
-            }
 
             _meetingStateService.CurrentResult = result;
 
@@ -414,6 +386,11 @@ public partial class GroupLobbyViewModel : ObservableObject
         }
         catch (Exception ex)
         {
+            /*
+             * No reseteamos _hasSentLocation aquí.
+             * Si el servidor ya recibió la ubicación, reintentar puede duplicar
+             * el flujo y desincronizar el protocolo.
+             */
             await MainThread.InvokeOnMainThreadAsync(() =>
             {
                 ErrorMessage = $"Fallo al calcular el punto de encuentro: {ex.Message}";
@@ -428,9 +405,6 @@ public partial class GroupLobbyViewModel : ObservableObject
 
     #region UI helpers
 
-    /// <summary>
-    /// Estado visual cuando el grupo aún no ha empezado.
-    /// </summary>
     private void UpdateWaitingState()
     {
         CurrentStatus = MemberCount <= 1
@@ -444,9 +418,6 @@ public partial class GroupLobbyViewModel : ObservableObject
         ProgressValue = MemberCount <= 1 ? 0.35 : 0.55;
     }
 
-    /// <summary>
-    /// Estado visual durante el cálculo.
-    /// </summary>
     private void UpdateCalculatingState(string subStatus, double progress = 0.80)
     {
         CurrentStatus = "Cálculo en curso";

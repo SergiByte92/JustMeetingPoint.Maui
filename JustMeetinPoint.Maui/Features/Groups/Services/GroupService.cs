@@ -11,6 +11,21 @@ public class GroupService : IGroupService
 {
     private readonly IAuthService _authService;
 
+    /// <summary>
+    /// El cliente mantiene un único socket TCP autenticado.
+    ///
+    /// Regla crítica:
+    /// Un único socket no puede tener varias operaciones concurrentes de send/receive.
+    ///
+    /// Sin este lock puede pasar:
+    /// - RefreshLobbyAsync consume bytes de SendLocation.
+    /// - PollResult lee una cabecera que esperaba otro método.
+    /// - SendLocation espera un JSON que ya fue consumido por otra operación.
+    ///
+    /// Esto explica el fallo intermitente: depende del timing entre tareas.
+    /// </summary>
+    private readonly SemaphoreSlim _socketLock = new(1, 1);
+
     private const int MainGroupCreateGroup = 1;
     private const int MainGroupJoinGroup = 2;
 
@@ -21,7 +36,12 @@ public class GroupService : IGroupService
     private const int LobbyOptionPollResult = 5;
 
     private const int PollDelayMilliseconds = 1500;
-    private const int MaxPollAttempts = 40;
+
+    /// <summary>
+    /// 80 intentos * 1.5 segundos = 120 segundos.
+    /// OTP en Docker + varios emuladores puede tardar bastante.
+    /// </summary>
+    private const int MaxPollAttempts = 80;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -39,213 +59,262 @@ public class GroupService : IGroupService
         string method,
         string category)
     {
-        return await Task.Run(() =>
+        await _socketLock.WaitAsync();
+
+        try
         {
-            Socket socket = GetAuthenticatedSocket();
-
-            SocketTools.sendInt(socket, MainGroupCreateGroup);
-            SocketTools.sendString(name, socket);
-            SocketTools.sendString(category, socket);
-            SocketTools.sendString(description, socket);
-            SocketTools.sendString(method, socket);
-
-            bool success = SocketTools.receiveBool(socket);
-
-            if (!success)
-                throw new InvalidOperationException("No se pudo crear el grupo.");
-
-            string groupCode = SocketTools.receiveString(socket);
-
-            // El servidor, tras crear el grupo, vuelve al bucle del lobby y envía
-            // la cabecera estándar antes de esperar la siguiente opción.
-            bool sessionValid = SocketTools.receiveBool(socket);
-
-            if (!sessionValid)
-                throw new InvalidOperationException("La sesión de lobby no es válida.");
-
-            int memberCount = SocketTools.receiveInt(socket);
-            bool hasStarted = SocketTools.receiveBool(socket);
-
-            return new GroupLobbyModel
+            return await Task.Run(() =>
             {
-                GroupCode = groupCode,
-                MemberCount = memberCount,
-                HasStarted = hasStarted,
-                IsCurrentUserHost = true
-            };
-        });
+                Socket socket = GetAuthenticatedSocket();
+
+                SocketTools.sendInt(socket, MainGroupCreateGroup);
+                SocketTools.sendString(name, socket);
+                SocketTools.sendString(category, socket);
+                SocketTools.sendString(description, socket);
+                SocketTools.sendString(method, socket);
+
+                bool success = SocketTools.receiveBool(socket);
+
+                if (!success)
+                    throw new InvalidOperationException("No se pudo crear el grupo.");
+
+                string groupCode = SocketTools.receiveString(socket);
+
+                bool sessionValid = SocketTools.receiveBool(socket);
+
+                if (!sessionValid)
+                    throw new InvalidOperationException("La sesión de lobby no es válida.");
+
+                int memberCount = SocketTools.receiveInt(socket);
+                bool hasStarted = SocketTools.receiveBool(socket);
+
+                return new GroupLobbyModel
+                {
+                    GroupCode = groupCode,
+                    MemberCount = memberCount,
+                    HasStarted = hasStarted,
+                    IsCurrentUserHost = true
+                };
+            });
+        }
+        finally
+        {
+            _socketLock.Release();
+        }
     }
 
     public async Task<GroupLobbyModel> JoinGroupAsync(string groupCode)
     {
-        return await Task.Run(() =>
+        await _socketLock.WaitAsync();
+
+        try
         {
-            Socket socket = GetAuthenticatedSocket();
-
-            SocketTools.sendInt(socket, MainGroupJoinGroup);
-            SocketTools.sendString(groupCode, socket);
-
-            bool success = SocketTools.receiveBool(socket);
-
-            if (!success)
-                throw new InvalidOperationException("No se pudo unir al grupo.");
-
-            bool sessionValid = SocketTools.receiveBool(socket);
-
-            if (!sessionValid)
-                throw new InvalidOperationException("La sesión de lobby no es válida.");
-
-            int memberCount = SocketTools.receiveInt(socket);
-            bool hasStarted = SocketTools.receiveBool(socket);
-
-            return new GroupLobbyModel
+            return await Task.Run(() =>
             {
-                GroupCode = groupCode,
-                MemberCount = memberCount,
-                HasStarted = hasStarted,
-                IsCurrentUserHost = false
-            };
-        });
+                Socket socket = GetAuthenticatedSocket();
+
+                SocketTools.sendInt(socket, MainGroupJoinGroup);
+                SocketTools.sendString(groupCode, socket);
+
+                bool success = SocketTools.receiveBool(socket);
+
+                if (!success)
+                    throw new InvalidOperationException("No se pudo unir al grupo.");
+
+                bool sessionValid = SocketTools.receiveBool(socket);
+
+                if (!sessionValid)
+                    throw new InvalidOperationException("La sesión de lobby no es válida.");
+
+                int memberCount = SocketTools.receiveInt(socket);
+                bool hasStarted = SocketTools.receiveBool(socket);
+
+                return new GroupLobbyModel
+                {
+                    GroupCode = groupCode,
+                    MemberCount = memberCount,
+                    HasStarted = hasStarted,
+                    IsCurrentUserHost = false
+                };
+            });
+        }
+        finally
+        {
+            _socketLock.Release();
+        }
     }
 
-    public async Task<GroupLobbyModel> RefreshLobbyAsync(string groupCode, bool isCurrentUserHost)
+    public async Task<GroupLobbyModel> RefreshLobbyAsync(
+        string groupCode,
+        bool isCurrentUserHost)
     {
-        return await Task.Run(() =>
+        await _socketLock.WaitAsync();
+
+        try
         {
-            Socket socket = GetAuthenticatedSocket();
-
-            Console.WriteLine($"[GroupService] RefreshLobbyAsync -> Group={groupCode}");
-
-            SocketTools.sendInt(socket, LobbyOptionRefresh);
-
-            bool sessionValid = SocketTools.receiveBool(socket);
-
-            if (!sessionValid)
-                throw new InvalidOperationException("La sesión del grupo ya no existe.");
-
-            int memberCount = SocketTools.receiveInt(socket);
-            bool hasStarted = SocketTools.receiveBool(socket);
-
-            Console.WriteLine($"[GroupService] RefreshLobbyAsync <- MemberCount={memberCount}, HasStarted={hasStarted}");
-
-            return new GroupLobbyModel
+            return await Task.Run(() =>
             {
-                GroupCode = groupCode,
-                MemberCount = memberCount,
-                HasStarted = hasStarted,
-                IsCurrentUserHost = isCurrentUserHost
-            };
-        });
+                Socket socket = GetAuthenticatedSocket();
+
+                Console.WriteLine($"[GroupService] RefreshLobbyAsync -> Group={groupCode}");
+
+                SocketTools.sendInt(socket, LobbyOptionRefresh);
+
+                bool sessionValid = SocketTools.receiveBool(socket);
+
+                if (!sessionValid)
+                    throw new InvalidOperationException("La sesión del grupo ya no existe.");
+
+                int memberCount = SocketTools.receiveInt(socket);
+                bool hasStarted = SocketTools.receiveBool(socket);
+
+                Console.WriteLine(
+                    $"[GroupService] RefreshLobbyAsync <- Members={memberCount}, HasStarted={hasStarted}");
+
+                return new GroupLobbyModel
+                {
+                    GroupCode = groupCode,
+                    MemberCount = memberCount,
+                    HasStarted = hasStarted,
+                    IsCurrentUserHost = isCurrentUserHost
+                };
+            });
+        }
+        finally
+        {
+            _socketLock.Release();
+        }
     }
 
     public async Task LeaveGroupAsync(string groupCode)
     {
-        await Task.Run(() =>
+        await _socketLock.WaitAsync();
+
+        try
         {
-            Socket socket = GetAuthenticatedSocket();
-            SocketTools.sendInt(socket, LobbyOptionExit);
-        });
+            await Task.Run(() =>
+            {
+                Socket socket = GetAuthenticatedSocket();
+
+                Console.WriteLine($"[GroupService] LeaveGroupAsync -> Group={groupCode}");
+
+                SocketTools.sendInt(socket, LobbyOptionExit);
+            });
+        }
+        finally
+        {
+            _socketLock.Release();
+        }
     }
 
-    /// <summary>
-    /// Envía la opción Start al servidor y gestiona la respuesta.
-    ///
-    /// BUG CORREGIDO: el servidor, después de procesar Start (tanto si
-    /// started==true como si started==false), vuelve al inicio del bucle
-    /// del lobby y envía SIEMPRE la cabecera estándar (bool, int, bool)
-    /// antes de esperar la siguiente opción del cliente.
-    ///
-    /// Si el cliente no leía esa cabecera cuando started==false,
-    /// los 6 bytes quedaban en el buffer y la siguiente llamada
-    /// del auto-refresh leía basura → desincronización permanente
-    /// del protocolo. El socket quedaba irrecuperable.
-    ///
-    /// Fix: leemos la cabecera SIEMPRE, independientemente del valor de started.
-    /// </summary>
-    public async Task<bool> StartGroupAsync(string groupCode, bool isCurrentUserHost)
+    public async Task<bool> StartGroupAsync(
+        string groupCode,
+        bool isCurrentUserHost)
     {
-        return await Task.Run(() =>
+        if (!isCurrentUserHost)
+            return false;
+
+        await _socketLock.WaitAsync();
+
+        try
         {
-            if (!isCurrentUserHost)
-                return false;
+            return await Task.Run(() =>
+            {
+                Socket socket = GetAuthenticatedSocket();
 
-            Socket socket = GetAuthenticatedSocket();
+                Console.WriteLine($"[GroupService] StartGroupAsync -> Group={groupCode}");
 
-            Console.WriteLine($"[GroupService] StartGroupAsync -> Group={groupCode}");
+                SocketTools.sendInt(socket, LobbyOptionStart);
 
-            SocketTools.sendInt(socket, LobbyOptionStart);
+                bool started = SocketTools.receiveBool(socket);
 
-            // 1. Resultado del Start
-            bool started = SocketTools.receiveBool(socket);
+                /*
+                 * Después de procesar Start, el servidor vuelve al inicio del bucle
+                 * del lobby y envía SIEMPRE la cabecera estándar:
+                 * bool sessionValid, int memberCount, bool hasStarted.
+                 *
+                 * Hay que consumirla aquí para mantener el protocolo sincronizado.
+                 */
+                bool sessionValid = SocketTools.receiveBool(socket);
+                int memberCount = SocketTools.receiveInt(socket);
+                bool hasStarted = SocketTools.receiveBool(socket);
 
-            // 2. Cabecera estándar del lobby — SIEMPRE se consume.
-            //    El servidor la envía en cada iteración del bucle,
-            //    independientemente de si Start fue exitoso o no.
-            bool sessionValid = SocketTools.receiveBool(socket);
-            int memberCount = SocketTools.receiveInt(socket);
-            bool hasStarted = SocketTools.receiveBool(socket);
+                Console.WriteLine(
+                    $"[GroupService] Start={started}, SessionValid={sessionValid}, " +
+                    $"Members={memberCount}, HasStarted={hasStarted}");
 
-            Console.WriteLine(
-                $"[GroupService] Start={started}, SessionValid={sessionValid}, " +
-                $"Members={memberCount}, HasStarted={hasStarted}");
+                if (!sessionValid)
+                    throw new InvalidOperationException("La sesión de lobby es inválida tras el Start.");
 
-            if (!sessionValid)
-                throw new InvalidOperationException("La sesión de lobby es inválida tras el Start.");
-
-            return started;
-        });
+                return started;
+            });
+        }
+        finally
+        {
+            _socketLock.Release();
+        }
     }
 
-    /// <summary>
-    /// Envía la ubicación del usuario y espera el resultado del cálculo de ruta.
-    ///
-    /// CAMBIO: el polling ya no usa Thread.Sleep (que bloquea un thread del pool)
-    /// sino await Task.Delay, que libera el thread mientras espera.
-    ///
-    /// El envío inicial y cada iteración de polling se ejecutan en Task.Run
-    /// porque SocketTools es síncrono/bloqueante.
-    /// </summary>
     public async Task<MeetingResultModel?> SendLocationAndWaitResultAsync(
         string groupCode,
         double latitude,
         double longitude)
     {
-        // ── Envío inicial de ubicación ─────────────────────────────────────────
-        MeetingResultModel? immediateResult = await Task.Run(() =>
+        await _socketLock.WaitAsync();
+
+        try
         {
-            Socket socket = GetAuthenticatedSocket();
+            /*
+             * Mantenemos el lock durante TODO el flujo final:
+             * SendLocation + posible PollResult.
+             *
+             * Motivo:
+             * Mientras este usuario espera su resultado final, ningún Refresh
+             * debe consumir bytes del mismo socket.
+             */
+            MeetingResultModel? immediateResult = await Task.Run(() =>
+            {
+                Socket socket = GetAuthenticatedSocket();
 
-            Console.WriteLine($"[GroupService] Enviando ubicación: {latitude}, {longitude}");
+                Console.WriteLine(
+                    $"[GroupService] SendLocation -> Group={groupCode}, " +
+                    $"Lat={latitude}, Lon={longitude}");
 
-            SocketTools.sendInt(socket, LobbyOptionSendLocation);
-            SocketTools.sendDouble(socket, latitude);
-            SocketTools.sendDouble(socket, longitude);
+                SocketTools.sendInt(socket, LobbyOptionSendLocation);
+                SocketTools.sendDouble(socket, latitude);
+                SocketTools.sendDouble(socket, longitude);
 
-            return ReceiveMeetingResultJson(socket);
-        });
+                return ReceiveMeetingResultJson(socket);
+            });
 
-        Console.WriteLine(
-            $"[GroupService] Respuesta inicial => Duration={immediateResult?.DurationSeconds}, " +
-            $"HasValidRoute={immediateResult?.HasValidRoute}");
+            Console.WriteLine(
+                $"[GroupService] SendLocation result <- Duration={immediateResult?.DurationSeconds}, " +
+                $"HasValidRoute={immediateResult?.HasValidRoute}");
 
-        if (immediateResult is not null && immediateResult.DurationSeconds != -1)
-            return NormalizeResult(immediateResult, latitude, longitude);
+            if (immediateResult is not null && immediateResult.DurationSeconds != -1)
+                return NormalizeResult(immediateResult, latitude, longitude);
 
-        // ── Polling asíncrono ──────────────────────────────────────────────────
-        // DurationSeconds == -1 significa que el servidor aún espera ubicaciones
-        // de otros miembros del grupo. Hacemos polling hasta obtener resultado.
-        return await PollForResultAsync(latitude, longitude);
+            /*
+             * DurationSeconds = -1 significa:
+             * "ubicación registrada, pero faltan ubicaciones de otros usuarios".
+             *
+             * A partir de aquí el cliente pregunta cada X segundos si el resultado
+             * ya está disponible.
+             */
+            return await PollForResultInternalAsync(latitude, longitude);
+        }
+        finally
+        {
+            _socketLock.Release();
+        }
     }
 
-    /// <summary>
-    /// Bucle de polling que espera el resultado OTP del servidor.
-    /// Usa await Task.Delay para no bloquear threads del pool durante la espera.
-    /// </summary>
-    private async Task<MeetingResultModel?> PollForResultAsync(double latitude, double longitude)
+    private async Task<MeetingResultModel?> PollForResultInternalAsync(
+        double latitude,
+        double longitude)
     {
         for (int attempt = 1; attempt <= MaxPollAttempts; attempt++)
         {
-            // ✅ No bloquea el thread del pool mientras espera.
             await Task.Delay(PollDelayMilliseconds);
 
             MeetingResultModel? pollResult = await Task.Run(() =>
@@ -253,9 +322,8 @@ public class GroupService : IGroupService
                 Socket socket = GetAuthenticatedSocket();
 
                 Console.WriteLine(
-                    $"[GroupService] Poll attempt {attempt}/{MaxPollAttempts}: leyendo cabecera...");
+                    $"[GroupService] Poll {attempt}/{MaxPollAttempts}: leyendo cabecera.");
 
-                // El servidor envía la cabecera antes de esperar la opción.
                 bool sessionValid = SocketTools.receiveBool(socket);
 
                 if (!sessionValid)
@@ -272,7 +340,7 @@ public class GroupService : IGroupService
                 MeetingResultModel? result = ReceiveMeetingResultJson(socket);
 
                 Console.WriteLine(
-                    $"[GroupService] Poll result => Duration={result?.DurationSeconds}, " +
+                    $"[GroupService] Poll result <- Duration={result?.DurationSeconds}, " +
                     $"HasValidRoute={result?.HasValidRoute}");
 
                 return result;
@@ -291,11 +359,6 @@ public class GroupService : IGroupService
             "El cálculo está tardando demasiado. Inténtalo de nuevo.");
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
-
-    /// <summary>
-    /// Lee el JSON enviado por el servidor y lo convierte a MeetingResultModel.
-    /// </summary>
     private static MeetingResultModel? ReceiveMeetingResultJson(Socket socket)
     {
         string json = SocketTools.receiveString(socket);
@@ -306,19 +369,12 @@ public class GroupService : IGroupService
             json,
             JsonOptions);
 
-        if (result == null)
+        if (result is null)
             throw new InvalidOperationException("No se pudo deserializar el resultado de ruta.");
 
         return result;
     }
 
-    /// <summary>
-    /// Normaliza el resultado recibido:
-    /// - rellena origen si no viniera informado
-    /// - construye RoutePoints de fallback
-    /// - convierte Legs en Itinerary
-    /// - aplica textos por defecto
-    /// </summary>
     private static MeetingResultModel NormalizeResult(
         MeetingResultModel result,
         double originLatitude,
@@ -340,9 +396,11 @@ public class GroupService : IGroupService
             result.MeetingPointName = "Punto de encuentro";
 
         if (string.IsNullOrWhiteSpace(result.AddressText))
+        {
             result.AddressText = result.HasValidRoute
                 ? "Ruta calculada correctamente"
                 : "No se encontró una ruta válida";
+        }
 
         if (string.IsNullOrWhiteSpace(result.DistanceText))
         {
@@ -363,7 +421,7 @@ public class GroupService : IGroupService
 
     private static TransitItineraryModel? BuildItinerary(MeetingResultModel result)
     {
-        if (result.Legs == null || result.Legs.Count == 0)
+        if (result.Legs is null || result.Legs.Count == 0)
             return null;
 
         return new TransitItineraryModel
@@ -379,12 +437,12 @@ public class GroupService : IGroupService
     {
         return new List<RoutePointModel>
         {
-            new RoutePointModel
+            new()
             {
                 Latitude = result.OriginLatitude,
                 Longitude = result.OriginLongitude
             },
-            new RoutePointModel
+            new()
             {
                 Latitude = result.Latitude,
                 Longitude = result.Longitude
@@ -396,10 +454,10 @@ public class GroupService : IGroupService
     {
         Socket? socket = _authService.CurrentSocket;
 
-        Console.WriteLine($"[GroupService] Socket null? {socket == null}");
+        Console.WriteLine($"[GroupService] Socket null? {socket is null}");
         Console.WriteLine($"[GroupService] Socket connected? {socket?.Connected}");
 
-        if (socket == null || !socket.Connected)
+        if (socket is null || !socket.Connected)
             throw new InvalidOperationException("No hay una sesión autenticada activa.");
 
         return socket;

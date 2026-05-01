@@ -86,7 +86,8 @@
                             PlaceholderColor="#5F6368"
                             TextColor="#202124"
                             BackgroundColor="Transparent"
-                            HeightRequest="48" />
+                            HeightRequest="48"
+                            MaxLength="50" />
                     </Border>
                 </VerticalStackLayout>
 
@@ -112,6 +113,7 @@
                             TextColor="#202124"
                             BackgroundColor="Transparent"
                             HeightRequest="96"
+                            MaxLength="250"
                             AutoSize="TextChanges" />
                     </Border>
                 </VerticalStackLayout>
@@ -225,31 +227,44 @@
                     </VerticalStackLayout>
                 </VerticalStackLayout>
 
-                <!-- ERROR -->
-                <Label
-                    Text="{Binding ErrorMessage}"
-                    TextColor="#D93025"
-                    FontSize="13"
-                    IsVisible="{Binding HasError}" />
-
             </VerticalStackLayout>
         </ScrollView>
 
-        <!-- CTA -->
+        <!-- CTA + ERROR FIJO -->
         <Border
             Grid.Row="1"
             BackgroundColor="#F3F4F6"
             StrokeThickness="0"
             Padding="20,12,20,20">
 
-            <Button
-                Text="Crear grupo"
-                Command="{Binding CreateGroupCommand}"
-                HeightRequest="52"
-                CornerRadius="16"
-                BackgroundColor="#1A73E8"
-                TextColor="#FFFFFF"
-                FontAttributes="Bold" />
+            <VerticalStackLayout Spacing="10">
+
+                <Border
+                    IsVisible="{Binding HasError}"
+                    BackgroundColor="#FEE2E2"
+                    Stroke="#FCA5A5"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 12"
+                    Padding="12">
+
+                    <Label
+                        Text="{Binding ErrorMessage}"
+                        TextColor="#991B1B"
+                        FontSize="13"
+                        FontAttributes="Bold" />
+                </Border>
+
+                <Button
+                    Text="Crear grupo"
+                    Command="{Binding CreateGroupCommand}"
+                    IsEnabled="{Binding IsNotBusy}"
+                    HeightRequest="52"
+                    CornerRadius="16"
+                    BackgroundColor="#1A73E8"
+                    TextColor="#FFFFFF"
+                    FontAttributes="Bold" />
+
+            </VerticalStackLayout>
         </Border>
 
     </Grid>

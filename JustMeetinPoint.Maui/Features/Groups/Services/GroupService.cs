@@ -9,20 +9,17 @@ namespace JustMeetinPoint.Maui.Features.Groups.Services;
 
 public class GroupService : IGroupService
 {
+    private const int MinGroupNameLength = 3;
+    private const int MaxGroupNameLength = 50;
+    private const int MaxGroupDescriptionLength = 250;
+    private const int MinGroupCodeLength = 4;
+    private const int MaxGroupCodeLength = 12;
+
     private readonly IAuthService _authService;
 
     /// <summary>
     /// El cliente mantiene un único socket TCP autenticado.
-    ///
-    /// Regla crítica:
     /// Un único socket no puede tener varias operaciones concurrentes de send/receive.
-    ///
-    /// Sin este lock puede pasar:
-    /// - RefreshLobbyAsync consume bytes de SendLocation.
-    /// - PollResult lee una cabecera que esperaba otro método.
-    /// - SendLocation espera un JSON que ya fue consumido por otra operación.
-    ///
-    /// Esto explica el fallo intermitente: depende del timing entre tareas.
     /// </summary>
     private readonly SemaphoreSlim _socketLock = new(1, 1);
 
@@ -59,6 +56,17 @@ public class GroupService : IGroupService
         string method,
         string category)
     {
+        string normalizedName = NormalizeText(name);
+        string normalizedDescription = NormalizeText(description);
+        string normalizedMethod = NormalizeText(method);
+        string normalizedCategory = NormalizeText(category);
+
+        ValidateCreateGroupPayload(
+            normalizedName,
+            normalizedDescription,
+            normalizedMethod,
+            normalizedCategory);
+
         await _socketLock.WaitAsync();
 
         try
@@ -68,10 +76,10 @@ public class GroupService : IGroupService
                 Socket socket = GetAuthenticatedSocket();
 
                 SocketTools.sendInt(socket, MainGroupCreateGroup);
-                SocketTools.sendString(name, socket);
-                SocketTools.sendString(category, socket);
-                SocketTools.sendString(description, socket);
-                SocketTools.sendString(method, socket);
+                SocketTools.sendString(normalizedName, socket);
+                SocketTools.sendString(normalizedCategory, socket);
+                SocketTools.sendString(normalizedDescription, socket);
+                SocketTools.sendString(normalizedMethod, socket);
 
                 bool success = SocketTools.receiveBool(socket);
 
@@ -79,20 +87,13 @@ public class GroupService : IGroupService
                     throw new InvalidOperationException("No se pudo crear el grupo.");
 
                 string groupCode = SocketTools.receiveString(socket);
-
-                bool sessionValid = SocketTools.receiveBool(socket);
-
-                if (!sessionValid)
-                    throw new InvalidOperationException("La sesión de lobby no es válida.");
-
-                int memberCount = SocketTools.receiveInt(socket);
-                bool hasStarted = SocketTools.receiveBool(socket);
+                LobbyHeader header = ReadLobbyHeader(socket, "La sesión de lobby no es válida.");
 
                 return new GroupLobbyModel
                 {
                     GroupCode = groupCode,
-                    MemberCount = memberCount,
-                    HasStarted = hasStarted,
+                    MemberCount = header.MemberCount,
+                    HasStarted = header.HasStarted,
                     IsCurrentUserHost = true
                 };
             });
@@ -105,6 +106,9 @@ public class GroupService : IGroupService
 
     public async Task<GroupLobbyModel> JoinGroupAsync(string groupCode)
     {
+        string normalizedCode = NormalizeGroupCode(groupCode);
+        ValidateGroupCode(normalizedCode);
+
         await _socketLock.WaitAsync();
 
         try
@@ -114,26 +118,20 @@ public class GroupService : IGroupService
                 Socket socket = GetAuthenticatedSocket();
 
                 SocketTools.sendInt(socket, MainGroupJoinGroup);
-                SocketTools.sendString(groupCode, socket);
+                SocketTools.sendString(normalizedCode, socket);
 
                 bool success = SocketTools.receiveBool(socket);
 
                 if (!success)
-                    throw new InvalidOperationException("No se pudo unir al grupo.");
+                    throw new InvalidOperationException("No se pudo unir al grupo. Comprueba el código o si el grupo ya empezó.");
 
-                bool sessionValid = SocketTools.receiveBool(socket);
-
-                if (!sessionValid)
-                    throw new InvalidOperationException("La sesión de lobby no es válida.");
-
-                int memberCount = SocketTools.receiveInt(socket);
-                bool hasStarted = SocketTools.receiveBool(socket);
+                LobbyHeader header = ReadLobbyHeader(socket, "La sesión de lobby no es válida.");
 
                 return new GroupLobbyModel
                 {
-                    GroupCode = groupCode,
-                    MemberCount = memberCount,
-                    HasStarted = hasStarted,
+                    GroupCode = normalizedCode,
+                    MemberCount = header.MemberCount,
+                    HasStarted = header.HasStarted,
                     IsCurrentUserHost = false
                 };
             });
@@ -148,6 +146,9 @@ public class GroupService : IGroupService
         string groupCode,
         bool isCurrentUserHost)
     {
+        string normalizedCode = NormalizeGroupCode(groupCode);
+        ValidateGroupCode(normalizedCode);
+
         await _socketLock.WaitAsync();
 
         try
@@ -156,26 +157,20 @@ public class GroupService : IGroupService
             {
                 Socket socket = GetAuthenticatedSocket();
 
-                Console.WriteLine($"[GroupService] RefreshLobbyAsync -> Group={groupCode}");
+                Console.WriteLine($"[GroupService] RefreshLobbyAsync -> Group={normalizedCode}");
 
                 SocketTools.sendInt(socket, LobbyOptionRefresh);
 
-                bool sessionValid = SocketTools.receiveBool(socket);
-
-                if (!sessionValid)
-                    throw new InvalidOperationException("La sesión del grupo ya no existe.");
-
-                int memberCount = SocketTools.receiveInt(socket);
-                bool hasStarted = SocketTools.receiveBool(socket);
+                LobbyHeader header = ReadLobbyHeader(socket, "La sesión del grupo ya no existe.");
 
                 Console.WriteLine(
-                    $"[GroupService] RefreshLobbyAsync <- Members={memberCount}, HasStarted={hasStarted}");
+                    $"[GroupService] RefreshLobbyAsync <- Members={header.MemberCount}, HasStarted={header.HasStarted}");
 
                 return new GroupLobbyModel
                 {
-                    GroupCode = groupCode,
-                    MemberCount = memberCount,
-                    HasStarted = hasStarted,
+                    GroupCode = normalizedCode,
+                    MemberCount = header.MemberCount,
+                    HasStarted = header.HasStarted,
                     IsCurrentUserHost = isCurrentUserHost
                 };
             });
@@ -188,6 +183,9 @@ public class GroupService : IGroupService
 
     public async Task LeaveGroupAsync(string groupCode)
     {
+        string normalizedCode = NormalizeGroupCode(groupCode);
+        ValidateGroupCode(normalizedCode);
+
         await _socketLock.WaitAsync();
 
         try
@@ -196,7 +194,7 @@ public class GroupService : IGroupService
             {
                 Socket socket = GetAuthenticatedSocket();
 
-                Console.WriteLine($"[GroupService] LeaveGroupAsync -> Group={groupCode}");
+                Console.WriteLine($"[GroupService] LeaveGroupAsync -> Group={normalizedCode}");
 
                 SocketTools.sendInt(socket, LobbyOptionExit);
             });
@@ -214,6 +212,9 @@ public class GroupService : IGroupService
         if (!isCurrentUserHost)
             return false;
 
+        string normalizedCode = NormalizeGroupCode(groupCode);
+        ValidateGroupCode(normalizedCode);
+
         await _socketLock.WaitAsync();
 
         try
@@ -222,29 +223,21 @@ public class GroupService : IGroupService
             {
                 Socket socket = GetAuthenticatedSocket();
 
-                Console.WriteLine($"[GroupService] StartGroupAsync -> Group={groupCode}");
+                Console.WriteLine($"[GroupService] StartGroupAsync -> Group={normalizedCode}");
 
                 SocketTools.sendInt(socket, LobbyOptionStart);
 
                 bool started = SocketTools.receiveBool(socket);
 
                 /*
-                 * Después de procesar Start, el servidor vuelve al inicio del bucle
-                 * del lobby y envía SIEMPRE la cabecera estándar:
-                 * bool sessionValid, int memberCount, bool hasStarted.
-                 *
-                 * Hay que consumirla aquí para mantener el protocolo sincronizado.
+                 * Después de Start, el servidor vuelve al inicio del bucle
+                 * y envía SIEMPRE la cabecera estándar del lobby.
                  */
-                bool sessionValid = SocketTools.receiveBool(socket);
-                int memberCount = SocketTools.receiveInt(socket);
-                bool hasStarted = SocketTools.receiveBool(socket);
+                LobbyHeader header = ReadLobbyHeader(socket, "La sesión de lobby es inválida tras el Start.");
 
                 Console.WriteLine(
-                    $"[GroupService] Start={started}, SessionValid={sessionValid}, " +
-                    $"Members={memberCount}, HasStarted={hasStarted}");
-
-                if (!sessionValid)
-                    throw new InvalidOperationException("La sesión de lobby es inválida tras el Start.");
+                    $"[GroupService] Start={started}, SessionValid={header.SessionValid}, " +
+                    $"Members={header.MemberCount}, HasStarted={header.HasStarted}");
 
                 return started;
             });
@@ -260,6 +253,10 @@ public class GroupService : IGroupService
         double latitude,
         double longitude)
     {
+        string normalizedCode = NormalizeGroupCode(groupCode);
+        ValidateGroupCode(normalizedCode);
+        ValidateCoordinates(latitude, longitude);
+
         await _socketLock.WaitAsync();
 
         try
@@ -267,17 +264,13 @@ public class GroupService : IGroupService
             /*
              * Mantenemos el lock durante TODO el flujo final:
              * SendLocation + posible PollResult.
-             *
-             * Motivo:
-             * Mientras este usuario espera su resultado final, ningún Refresh
-             * debe consumir bytes del mismo socket.
              */
             MeetingResultModel? immediateResult = await Task.Run(() =>
             {
                 Socket socket = GetAuthenticatedSocket();
 
                 Console.WriteLine(
-                    $"[GroupService] SendLocation -> Group={groupCode}, " +
+                    $"[GroupService] SendLocation -> Group={normalizedCode}, " +
                     $"Lat={latitude}, Lon={longitude}");
 
                 SocketTools.sendInt(socket, LobbyOptionSendLocation);
@@ -294,13 +287,6 @@ public class GroupService : IGroupService
             if (immediateResult is not null && immediateResult.DurationSeconds != -1)
                 return NormalizeResult(immediateResult, latitude, longitude);
 
-            /*
-             * DurationSeconds = -1 significa:
-             * "ubicación registrada, pero faltan ubicaciones de otros usuarios".
-             *
-             * A partir de aquí el cliente pregunta cada X segundos si el resultado
-             * ya está disponible.
-             */
             return await PollForResultInternalAsync(latitude, longitude);
         }
         finally
@@ -324,16 +310,10 @@ public class GroupService : IGroupService
                 Console.WriteLine(
                     $"[GroupService] Poll {attempt}/{MaxPollAttempts}: leyendo cabecera.");
 
-                bool sessionValid = SocketTools.receiveBool(socket);
-
-                if (!sessionValid)
-                    throw new InvalidOperationException("La sesión del grupo ha finalizado.");
-
-                int memberCount = SocketTools.receiveInt(socket);
-                bool hasStarted = SocketTools.receiveBool(socket);
+                LobbyHeader header = ReadLobbyHeader(socket, "La sesión del grupo ha finalizado.");
 
                 Console.WriteLine(
-                    $"[GroupService] Poll header <- Members={memberCount}, HasStarted={hasStarted}");
+                    $"[GroupService] Poll header <- Members={header.MemberCount}, HasStarted={header.HasStarted}");
 
                 SocketTools.sendInt(socket, LobbyOptionPollResult);
 
@@ -355,8 +335,21 @@ public class GroupService : IGroupService
             return NormalizeResult(pollResult, latitude, longitude);
         }
 
-        throw new InvalidOperationException(
+        throw new TimeoutException(
             "El cálculo está tardando demasiado. Inténtalo de nuevo.");
+    }
+
+    private static LobbyHeader ReadLobbyHeader(Socket socket, string invalidSessionMessage)
+    {
+        bool sessionValid = SocketTools.receiveBool(socket);
+
+        if (!sessionValid)
+            throw new InvalidOperationException(invalidSessionMessage);
+
+        int memberCount = SocketTools.receiveInt(socket);
+        bool hasStarted = SocketTools.receiveBool(socket);
+
+        return new LobbyHeader(sessionValid, memberCount, hasStarted);
     }
 
     private static MeetingResultModel? ReceiveMeetingResultJson(Socket socket)
@@ -365,14 +358,22 @@ public class GroupService : IGroupService
 
         Console.WriteLine($"[GroupService] JSON recibido: {json}");
 
-        MeetingResultModel? result = JsonSerializer.Deserialize<MeetingResultModel>(
-            json,
-            JsonOptions);
+        try
+        {
+            MeetingResultModel? result = JsonSerializer.Deserialize<MeetingResultModel>(
+                json,
+                JsonOptions);
 
-        if (result is null)
-            throw new InvalidOperationException("No se pudo deserializar el resultado de ruta.");
+            if (result is null)
+                throw new InvalidOperationException("No se pudo deserializar el resultado de ruta.");
 
-        return result;
+            return result;
+        }
+        catch (JsonException ex)
+        {
+            throw new InvalidOperationException(
+                $"El servidor devolvió un resultado de ruta inválido: {json}", ex);
+        }
     }
 
     private static MeetingResultModel NormalizeResult(
@@ -462,4 +463,71 @@ public class GroupService : IGroupService
 
         return socket;
     }
+
+    private static void ValidateCreateGroupPayload(
+        string name,
+        string description,
+        string method,
+        string category)
+    {
+        if (string.IsNullOrWhiteSpace(name) ||
+            name.Length < MinGroupNameLength ||
+            name.Length > MaxGroupNameLength)
+        {
+            throw new ArgumentException("El nombre del grupo no tiene un formato válido.");
+        }
+
+        if (description.Length > MaxGroupDescriptionLength)
+            throw new ArgumentException("La descripción del grupo es demasiado larga.");
+
+        if (string.IsNullOrWhiteSpace(method))
+            throw new ArgumentException("El método de cálculo no es válido.");
+
+        if (string.IsNullOrWhiteSpace(category))
+            throw new ArgumentException("La categoría del grupo no es válida.");
+    }
+
+    private static void ValidateGroupCode(string groupCode)
+    {
+        if (string.IsNullOrWhiteSpace(groupCode) ||
+            groupCode.Length < MinGroupCodeLength ||
+            groupCode.Length > MaxGroupCodeLength ||
+            !groupCode.All(char.IsLetterOrDigit))
+        {
+            throw new ArgumentException("El código de grupo no tiene un formato válido.");
+        }
+    }
+
+    private static void ValidateCoordinates(double latitude, double longitude)
+    {
+        if (double.IsNaN(latitude) ||
+            double.IsInfinity(latitude) ||
+            double.IsNaN(longitude) ||
+            double.IsInfinity(longitude) ||
+            latitude < -90 ||
+            latitude > 90 ||
+            longitude < -180 ||
+            longitude > 180)
+        {
+            throw new ArgumentException("Las coordenadas de ubicación no son válidas.");
+        }
+    }
+
+    private static string NormalizeText(string? value)
+    {
+        return value?.Trim() ?? string.Empty;
+    }
+
+    private static string NormalizeGroupCode(string? value)
+    {
+        return (value ?? string.Empty)
+            .Trim()
+            .Replace(" ", string.Empty)
+            .ToUpperInvariant();
+    }
+
+    private sealed record LobbyHeader(
+        bool SessionValid,
+        int MemberCount,
+        bool HasStarted);
 }

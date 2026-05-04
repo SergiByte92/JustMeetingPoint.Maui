@@ -9,7 +9,7 @@ public class SocketAuthService : IAuthService
     // ✅ CORRECTO: centralizar la configuración de red en constantes.
     // Así, si cambias de servidor, cambias UNA línea, no buscas por todo el código.
     // El siguiente paso ideal sería leer esto desde appsettings.json o Preferences.
-    private const string ServerIp = "192.168.1.37";
+    private const string ServerIp = "172.20.32.1";
     private const int ServerPort = 1001;
 
     public Socket? CurrentSocket { get; private set; }

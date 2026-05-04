@@ -9,20 +9,23 @@ namespace JustMeetinPoint.Maui.Features.Groups.Services;
 
 public class GroupService : IGroupService
 {
+    #region Constants - Validation
+
     private const int MinGroupNameLength = 3;
     private const int MaxGroupNameLength = 50;
     private const int MaxGroupDescriptionLength = 250;
+
     private const int MinGroupCodeLength = 4;
     private const int MaxGroupCodeLength = 12;
 
-    private readonly IAuthService _authService;
+    #endregion
 
-    /// <summary>
-    /// El cliente mantiene un único socket TCP autenticado.
-    /// Un único socket no puede tener varias operaciones concurrentes de send/receive.
-    /// </summary>
-    private readonly SemaphoreSlim _socketLock = new(1, 1);
+    #region Constants - TCP Protocol
 
+    /*
+     * Estos códigos deben coincidir exactamente con los valores esperados
+     * por el servidor. Si cambian aquí, también deben cambiar allí.
+     */
     private const int MainGroupCreateGroup = 1;
     private const int MainGroupJoinGroup = 2;
 
@@ -32,23 +35,48 @@ public class GroupService : IGroupService
     private const int LobbyOptionSendLocation = 4;
     private const int LobbyOptionPollResult = 5;
 
+    #endregion
+
+    #region Constants - Polling
+
     private const int PollDelayMilliseconds = 1500;
 
-    /// <summary>
-    /// 80 intentos * 1.5 segundos = 120 segundos.
-    /// OTP en Docker + varios emuladores puede tardar bastante.
-    /// </summary>
+    /*
+     * 80 intentos * 1.5 segundos = 120 segundos.
+     * OTP en Docker + varios emuladores puede tardar en devolver todas las rutas.
+     */
     private const int MaxPollAttempts = 80;
+
+    #endregion
+
+    #region Fields
+
+    private readonly IAuthService _authService;
+
+    /*
+     * El cliente mantiene un único socket TCP autenticado.
+     * Este lock evita operaciones concurrentes de send/receive sobre el mismo socket,
+     * ya que podrían romper el orden del protocolo cliente-servidor.
+     */
+    private readonly SemaphoreSlim _socketLock = new(1, 1);
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true
     };
 
+    #endregion
+
+    #region Constructor
+
     public GroupService(IAuthService authService)
     {
         _authService = authService;
     }
+
+    #endregion
+
+    #region Public API - Group Lifecycle
 
     public async Task<GroupLobbyModel> CreateGroupAsync(
         string name,
@@ -123,7 +151,8 @@ public class GroupService : IGroupService
                 bool success = SocketTools.receiveBool(socket);
 
                 if (!success)
-                    throw new InvalidOperationException("No se pudo unir al grupo. Comprueba el código o si el grupo ya empezó.");
+                    throw new InvalidOperationException(
+                        "No se pudo unir al grupo. Comprueba el código o si el grupo ya empezó.");
 
                 LobbyHeader header = ReadLobbyHeader(socket, "La sesión de lobby no es válida.");
 
@@ -141,6 +170,10 @@ public class GroupService : IGroupService
             _socketLock.Release();
         }
     }
+
+    #endregion
+
+    #region Public API - Lobby Lifecycle
 
     public async Task<GroupLobbyModel> RefreshLobbyAsync(
         string groupCode,
@@ -230,10 +263,12 @@ public class GroupService : IGroupService
                 bool started = SocketTools.receiveBool(socket);
 
                 /*
-                 * Después de Start, el servidor vuelve al inicio del bucle
-                 * y envía SIEMPRE la cabecera estándar del lobby.
+                 * Tras Start, el servidor vuelve al ciclo estándar del lobby
+                 * y envía una nueva cabecera. Por eso se lee aquí.
                  */
-                LobbyHeader header = ReadLobbyHeader(socket, "La sesión de lobby es inválida tras el Start.");
+                LobbyHeader header = ReadLobbyHeader(
+                    socket,
+                    "La sesión de lobby es inválida tras el Start.");
 
                 Console.WriteLine(
                     $"[GroupService] Start={started}, SessionValid={header.SessionValid}, " +
@@ -247,6 +282,10 @@ public class GroupService : IGroupService
             _socketLock.Release();
         }
     }
+
+    #endregion
+
+    #region Public API - Location And Results
 
     public async Task<MeetingResultModel?> SendLocationAndWaitResultAsync(
         string groupCode,
@@ -262,8 +301,9 @@ public class GroupService : IGroupService
         try
         {
             /*
-             * Mantenemos el lock durante TODO el flujo final:
-             * SendLocation + posible PollResult.
+             * Este flujo mantiene el lock hasta completar SendLocation + PollResult.
+             * Si otro método usara el socket durante este proceso, se podría leer
+             * una respuesta que pertenece a otra operación.
              */
             MeetingResultModel? immediateResult = await Task.Run(() =>
             {
@@ -295,6 +335,10 @@ public class GroupService : IGroupService
         }
     }
 
+    #endregion
+
+    #region Private Workflow Helpers
+
     private async Task<MeetingResultModel?> PollForResultInternalAsync(
         double latitude,
         double longitude)
@@ -310,6 +354,10 @@ public class GroupService : IGroupService
                 Console.WriteLine(
                     $"[GroupService] Poll {attempt}/{MaxPollAttempts}: leyendo cabecera.");
 
+                /*
+                 * El servidor envía una cabecera al inicio de cada iteración del lobby.
+                 * El cliente debe consumirla antes de enviar PollResult.
+                 */
                 LobbyHeader header = ReadLobbyHeader(socket, "La sesión del grupo ha finalizado.");
 
                 Console.WriteLine(
@@ -339,8 +387,18 @@ public class GroupService : IGroupService
             "El cálculo está tardando demasiado. Inténtalo de nuevo.");
     }
 
+    #endregion
+
+    #region Private Socket Protocol Helpers
+
     private static LobbyHeader ReadLobbyHeader(Socket socket, string invalidSessionMessage)
     {
+        /*
+         * Orden exacto esperado desde el servidor:
+         * 1. bool sessionValid
+         * 2. int memberCount
+         * 3. bool hasStarted
+         */
         bool sessionValid = SocketTools.receiveBool(socket);
 
         if (!sessionValid)
@@ -376,11 +434,33 @@ public class GroupService : IGroupService
         }
     }
 
+    private Socket GetAuthenticatedSocket()
+    {
+        Socket? socket = _authService.CurrentSocket;
+
+        Console.WriteLine($"[GroupService] Socket null? {socket is null}");
+        Console.WriteLine($"[GroupService] Socket connected? {socket?.Connected}");
+
+        if (socket is null || !socket.Connected)
+            throw new InvalidOperationException("No hay una sesión autenticada activa.");
+
+        return socket;
+    }
+
+    #endregion
+
+    #region Private Result Mapping Helpers
+
     private static MeetingResultModel NormalizeResult(
         MeetingResultModel result,
         double originLatitude,
         double originLongitude)
     {
+        /*
+         * Convenciones del servidor:
+         * - DurationSeconds = -1 => resultado pendiente.
+         * - DurationSeconds = -2 => error funcional en el cálculo.
+         */
         if (result.DurationSeconds == -2)
             throw new InvalidOperationException(result.AddressText);
 
@@ -451,18 +531,9 @@ public class GroupService : IGroupService
         };
     }
 
-    private Socket GetAuthenticatedSocket()
-    {
-        Socket? socket = _authService.CurrentSocket;
+    #endregion
 
-        Console.WriteLine($"[GroupService] Socket null? {socket is null}");
-        Console.WriteLine($"[GroupService] Socket connected? {socket?.Connected}");
-
-        if (socket is null || !socket.Connected)
-            throw new InvalidOperationException("No hay una sesión autenticada activa.");
-
-        return socket;
-    }
+    #region Private Validation Helpers
 
     private static void ValidateCreateGroupPayload(
         string name,
@@ -513,6 +584,10 @@ public class GroupService : IGroupService
         }
     }
 
+    #endregion
+
+    #region Private Normalization Helpers
+
     private static string NormalizeText(string? value)
     {
         return value?.Trim() ?? string.Empty;
@@ -526,8 +601,14 @@ public class GroupService : IGroupService
             .ToUpperInvariant();
     }
 
+    #endregion
+
+    #region Private Records
+
     private sealed record LobbyHeader(
         bool SessionValid,
         int MemberCount,
         bool HasStarted);
+
+    #endregion
 }

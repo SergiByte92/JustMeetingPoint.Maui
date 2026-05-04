@@ -5,51 +5,13 @@
     x:Class="JustMeetinPoint.Maui.Features.Groups.Views.CreateGroupView"
     Title="Crear grupo"
     BackgroundColor="#F3F4F6"
+    Shell.NavBarIsVisible="False"
     Shell.TabBarIsVisible="False">
 
     <Grid RowDefinitions="*,Auto">
 
         <ScrollView Grid.Row="0">
-            <VerticalStackLayout Padding="20,22,20,32" Spacing="22">
-
-                <!-- STEPPER -->
-                <HorizontalStackLayout
-                    HorizontalOptions="Center"
-                    Spacing="8">
-
-                    <Border
-                        WidthRequest="12"
-                        HeightRequest="12"
-                        BackgroundColor="#1A73E8"
-                        StrokeThickness="0"
-                        StrokeShape="RoundRectangle 6" />
-
-                    <BoxView
-                        WidthRequest="36"
-                        HeightRequest="2"
-                        Color="#D2E3FC"
-                        VerticalOptions="Center" />
-
-                    <Border
-                        WidthRequest="12"
-                        HeightRequest="12"
-                        BackgroundColor="#D2E3FC"
-                        StrokeThickness="0"
-                        StrokeShape="RoundRectangle 6" />
-
-                    <BoxView
-                        WidthRequest="36"
-                        HeightRequest="2"
-                        Color="#D2E3FC"
-                        VerticalOptions="Center" />
-
-                    <Border
-                        WidthRequest="12"
-                        HeightRequest="12"
-                        BackgroundColor="#D2E3FC"
-                        StrokeThickness="0"
-                        StrokeShape="RoundRectangle 6" />
-                </HorizontalStackLayout>
+            <VerticalStackLayout Padding="20,28,20,32" Spacing="22">
 
                 <!-- HEADER -->
                 <VerticalStackLayout Spacing="4">

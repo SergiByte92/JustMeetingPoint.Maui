@@ -5,6 +5,7 @@
     x:Class="JustMeetinPoint.Maui.Features.Groups.Views.CreateGroupView"
     Title="Crear quedada"
     BackgroundColor="#F3F4F6"
+    Shell.NavBarIsVisible="False"
     Shell.TabBarIsVisible="False">
 
     <Grid RowDefinitions="*,Auto">

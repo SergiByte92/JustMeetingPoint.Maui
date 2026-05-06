@@ -18,12 +18,12 @@
                     TextColor="#0B57D0" />
 
                 <Label
-                    Text="Crea un grupo o accede con un código."
+                    Text="Crea una quedada o únete con un código."
                     FontSize="14"
                     TextColor="#5F6368" />
             </VerticalStackLayout>
 
-            <!-- CTA CREAR GRUPO -->
+            <!-- CTA CREAR QUEDADA -->
             <Border
                 BackgroundColor="#FFFFFF"
                 Stroke="#E5E7EB"
@@ -35,19 +35,19 @@
 
                     <VerticalStackLayout Spacing="4">
                         <Label
-                            Text="Crear grupo"
+                            Text="Crear quedada"
                             FontSize="20"
                             FontAttributes="Bold"
                             TextColor="#202124" />
 
                         <Label
-                            Text="Genera un código para invitar a otros usuarios."
+                            Text="Genera un código para invitar a los demás."
                             FontSize="14"
                             TextColor="#5F6368" />
                     </VerticalStackLayout>
 
                     <Button
-                        Text="Crear grupo"
+                        Text="Crear quedada"
                         HeightRequest="48"
                         CornerRadius="16"
                         BackgroundColor="#1A73E8"
@@ -67,7 +67,7 @@
 
                 <Label
                     Grid.Column="1"
-                    Text="o unirse con código"
+                    Text="o únete con un código"
                     FontSize="12"
                     TextColor="#5F6368"
                     Margin="10,0" />
@@ -91,13 +91,13 @@
 
                     <VerticalStackLayout Spacing="4">
                         <Label
-                            Text="Unirse a un grupo"
+                            Text="Unirse a una quedada"
                             FontSize="18"
                             FontAttributes="Bold"
                             TextColor="#202124" />
 
                         <Label
-                            Text="Introduce el código compartido por el creador."
+                            Text="Introduce el código que te han compartido."
                             FontSize="13"
                             TextColor="#5F6368" />
                     </VerticalStackLayout>
@@ -123,7 +123,7 @@
                     </Border>
 
                     <Button
-                        Text="Unirme"
+                        Text="Unirme a la quedada"
                         HeightRequest="48"
                         CornerRadius="16"
                         BackgroundColor="#D2E3FC"

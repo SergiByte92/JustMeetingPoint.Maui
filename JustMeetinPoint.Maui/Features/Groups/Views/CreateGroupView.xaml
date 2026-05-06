@@ -3,7 +3,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     x:Class="JustMeetinPoint.Maui.Features.Groups.Views.CreateGroupView"
-    Title="Crear grupo"
+    Title="Crear quedada"
     BackgroundColor="#F3F4F6"
     Shell.TabBarIsVisible="False">
 
@@ -11,45 +11,6 @@
 
         <ScrollView Grid.Row="0">
             <VerticalStackLayout Padding="20,22,20,32" Spacing="22">
-
-                <!-- STEPPER -->
-                <HorizontalStackLayout
-                    HorizontalOptions="Center"
-                    Spacing="8">
-
-                    <Border
-                        WidthRequest="12"
-                        HeightRequest="12"
-                        BackgroundColor="#1A73E8"
-                        StrokeThickness="0"
-                        StrokeShape="RoundRectangle 6" />
-
-                    <BoxView
-                        WidthRequest="36"
-                        HeightRequest="2"
-                        Color="#D2E3FC"
-                        VerticalOptions="Center" />
-
-                    <Border
-                        WidthRequest="12"
-                        HeightRequest="12"
-                        BackgroundColor="#D2E3FC"
-                        StrokeThickness="0"
-                        StrokeShape="RoundRectangle 6" />
-
-                    <BoxView
-                        WidthRequest="36"
-                        HeightRequest="2"
-                        Color="#D2E3FC"
-                        VerticalOptions="Center" />
-
-                    <Border
-                        WidthRequest="12"
-                        HeightRequest="12"
-                        BackgroundColor="#D2E3FC"
-                        StrokeThickness="0"
-                        StrokeShape="RoundRectangle 6" />
-                </HorizontalStackLayout>
 
                 <!-- HEADER -->
                 <VerticalStackLayout Spacing="4">
@@ -60,7 +21,7 @@
                         TextColor="#0B57D0" />
 
                     <Label
-                        Text="Define los datos básicos antes de crear el grupo."
+                        Text="Añade los datos básicos antes de crear la quedada."
                         FontSize="14"
                         TextColor="#5F6368" />
                 </VerticalStackLayout>
@@ -255,7 +216,7 @@
                 </Border>
 
                 <Button
-                    Text="Crear grupo"
+                    Text="Crear quedada"
                     Command="{Binding CreateGroupCommand}"
                     IsEnabled="{Binding IsNotBusy}"
                     HeightRequest="52"

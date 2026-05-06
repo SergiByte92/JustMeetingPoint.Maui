@@ -21,11 +21,10 @@ public partial class CreateGroupViewModel : ObservableObject
 
         Categories = new ObservableCollection<CategoryOptionModel>
         {
-            new() { Name = "Comer" },
             new() { Name = "Café" },
+            new() { Name = "Comida" },
             new() { Name = "Ocio" },
-            new() { Name = "Trabajo" },
-            new() { Name = "Deporte" }
+            new() { Name = "Trabajo" }
         };
 
         Methods = new ObservableCollection<MethodOptionModel>

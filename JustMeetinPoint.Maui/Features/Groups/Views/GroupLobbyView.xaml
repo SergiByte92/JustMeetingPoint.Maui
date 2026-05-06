@@ -3,55 +3,12 @@
     x:Class="JustMeetinPoint.Maui.Features.Groups.Views.GroupLobbyView"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="Lobby"
+    Title="Quedada"
     BackgroundColor="#F3F4F6"
     Shell.NavBarIsVisible="True">
 
     <ScrollView>
         <VerticalStackLayout Padding="20,22,20,32" Spacing="18">
-
-            <Grid
-                ColumnDefinitions="*,Auto,*,Auto,*"
-                VerticalOptions="Center"
-                HorizontalOptions="Center"
-                Margin="0,4,0,6">
-
-                <BoxView
-                    Grid.Column="0"
-                    HeightRequest="4"
-                    WidthRequest="36"
-                    CornerRadius="2"
-                    Color="{Binding Step1Color}"
-                    VerticalOptions="Center" />
-
-                <Ellipse
-                    Grid.Column="1"
-                    WidthRequest="12"
-                    HeightRequest="12"
-                    Fill="{Binding Step1Color}" />
-
-                <BoxView
-                    Grid.Column="2"
-                    HeightRequest="4"
-                    WidthRequest="36"
-                    CornerRadius="2"
-                    Color="{Binding Step2Color}"
-                    VerticalOptions="Center" />
-
-                <Ellipse
-                    Grid.Column="3"
-                    WidthRequest="12"
-                    HeightRequest="12"
-                    Fill="{Binding Step2Color}" />
-
-                <BoxView
-                    Grid.Column="4"
-                    HeightRequest="4"
-                    WidthRequest="36"
-                    CornerRadius="2"
-                    Color="{Binding Step3Color}"
-                    VerticalOptions="Center" />
-            </Grid>
 
             <VerticalStackLayout Spacing="4">
                 <Label
@@ -75,7 +32,7 @@
 
                 <VerticalStackLayout Spacing="10">
                     <Label
-                        Text="Código del grupo"
+                        Text="Código de la quedada"
                         FontSize="14"
                         FontAttributes="Bold"
                         TextColor="#202124" />
@@ -215,7 +172,7 @@
             </Border>
 
             <Button
-                Text="Iniciar grupo"
+                Text="Iniciar quedada"
                 Command="{Binding StartCommand}"
                 IsVisible="{Binding CanStartGroup}"
                 BackgroundColor="#1A73E8"
@@ -225,7 +182,7 @@
                 HeightRequest="52" />
 
             <Button
-                Text="Salir del grupo"
+                Text="Salir de la quedada"
                 Command="{Binding LeaveGroupCommand}"
                 BackgroundColor="#FFFFFF"
                 TextColor="#D93025"

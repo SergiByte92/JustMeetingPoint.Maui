@@ -28,16 +28,16 @@ public partial class HomeViewModel : ObservableObject
             : $"Hola, {Username}";
 
     public string SubtitleText =>
-        "Encuentra el mejor punto para todos.";
+        "Encuentra un sitio que os venga bien a todos.";
 
     public string MainCtaTitle =>
         "¿Listos para vuestra próxima quedada?";
 
     public string MainCtaSubtitle =>
-        "Gestiona tu grupo, comparte ubicaciones y deja que JMP calcule el punto más equilibrado.";
+        "Comparte las ubicaciones de los participantes y deja que JMP proponga un punto cómodo para todos.";
 
     public string PrimaryButtonText =>
-        "Ir al grupo";
+        "Crear  quedada";
 
     public string QuickActionTitle =>
         "Acciones rápidas";
